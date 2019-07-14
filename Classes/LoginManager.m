@@ -405,19 +405,21 @@ NSString *const kITCPaymentVendorsPaymentAction = @"/ra/paymentConsolidation/pro
 }
 
 - (NSString *)generateCSRFToken {
-	[self resetITCReporterAPI];
-	NSURL *generateCSRFTokenURL = [NSURL URLWithString:[kITCRBaseURL stringByAppendingString:kITCRGenerateCSRFTokenAction]];
-	NSMutableURLRequest *generateRequest = [NSMutableURLRequest requestWithURL:generateCSRFTokenURL];
-	[generateRequest setHTTPMethod:@"GET"];
-	NSHTTPURLResponse *generateResponse = nil;
-	NSData *generateData = [NSURLConnection sendSynchronousRequest:generateRequest returningResponse:&generateResponse error:nil];
+    [self resetITCReporterAPI];
+    NSURL *generateCSRFTokenURL = [NSURL URLWithString:[kITCRBaseURL stringByAppendingString:kITCRGenerateCSRFTokenAction]];
+    NSMutableURLRequest *generateRequest = [NSMutableURLRequest requestWithURL:generateCSRFTokenURL];
+    [generateRequest setHTTPMethod:@"POST"];
+    [generateRequest setValue:@"1" forHTTPHeaderField:@"FETCH-CSRF-TOKEN"];
+
+    NSHTTPURLResponse *generateResponse = nil;
+    NSData *generateData = [NSURLConnection sendSynchronousRequest:generateRequest returningResponse:&generateResponse error:nil];
     NSString *generateString = [[NSString alloc] initWithData:generateData encoding:NSUTF8StringEncoding];
-    if ([generateString containsString:@"this.setRequestHeader(\"CSRF\", \""])
+    if ([generateString containsString:@"CSRF:"])
     {
-        NSString *result = [generateString substringWithRange:NSMakeRange([generateString rangeOfString:@"this.setRequestHeader(\"CSRF\", \""].location + 31, 159)];
+        NSString *result = [generateString substringWithRange:NSMakeRange([generateString rangeOfString:@"CSRF:"].location + 5, 159)];
         return result;
     }
-	return nil;
+    return nil;
 }
 
 - (NSDictionary *)getAccessKey:(NSString *)csrfToken {
