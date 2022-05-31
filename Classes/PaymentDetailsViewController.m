@@ -120,11 +120,11 @@ typedef NS_ENUM(NSInteger, PaymentDetailsRow) {
 		NSArray *details = paymentDetails[indexPath.section];
 		
 		UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Delete", comment: nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
-			NSMutableArray *mutablePaymentDetails = [[NSMutableArray alloc] initWithArray:paymentDetails];
+			NSMutableArray *mutablePaymentDetails = [[NSMutableArray alloc] initWithArray:self->paymentDetails];
 			[mutablePaymentDetails removeObject:details];
-			paymentDetails = [mutablePaymentDetails copy];
-			[delegate paymentDetailsViewController:self didDeletePaymentDetails:details[0]];
-			if (paymentDetails.count == 0) {
+			self->paymentDetails = [mutablePaymentDetails copy];
+			[self->delegate paymentDetailsViewController:self didDeletePaymentDetails:details[0]];
+			if (self->paymentDetails.count == 0) {
 				[self.navigationController popViewControllerAnimated:YES];
 			} else {
 				[tableView reloadData];
