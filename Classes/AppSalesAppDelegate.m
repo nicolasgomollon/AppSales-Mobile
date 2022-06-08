@@ -20,12 +20,17 @@
 #import "PromoCodesViewController.h"
 #import "PromoCodesLicenseViewController.h"
 #import "UIViewController+Alert.h"
+#import "UINavigationBar+FixBarColor.h"
 
 @implementation AppSalesAppDelegate
 
 @synthesize window, accountsViewController, accountsPopover;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    if (@available(iOS 13.0, *)) {
+        [UINavigationBar fixNavigationBar];
+    }
+    
 	[[KKPasscodeLock sharedLock] setDefaultSettings];
 	[[KKPasscodeLock sharedLock] setEraseOption:NO];
 	
