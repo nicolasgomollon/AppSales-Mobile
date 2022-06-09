@@ -20,7 +20,8 @@
 #import "PromoCodesViewController.h"
 #import "PromoCodesLicenseViewController.h"
 #import "UIViewController+Alert.h"
-#import "UINavigationBar+FixBarColor.h"
+#import "UINavigationBar+FixAppearance.h"
+#import "UIToolbar+FixAppearance.h"
 
 @implementation AppSalesAppDelegate
 
@@ -28,7 +29,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (@available(iOS 13.0, *)) {
-        [UINavigationBar fixNavigationBar];
+        [UINavigationBar fixNavigationBarAppearance];
+        [UIToolbar fixToolbarAppearance];
     }
     
 	[[KKPasscodeLock sharedLock] setDefaultSettings];

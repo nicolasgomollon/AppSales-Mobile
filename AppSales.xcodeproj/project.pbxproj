@@ -9,8 +9,9 @@
 /* Begin PBXBuildFile section */
 		4509175A23D030130028AF83 /* DarkModeCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 4509175923D030130028AF83 /* DarkModeCheck.m */; };
 		45C2B2232460296200C84374 /* csv.css in Resources */ = {isa = PBXBuildFile; fileRef = 45C2B2212460296200C84374 /* csv.css */; };
-		621713D428509E1F00E5E366 /* UINavigationBar+FixBarColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 621713D328509E1F00E5E366 /* UINavigationBar+FixBarColor.m */; };
+		621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */; };
 		621D32432531C98C00D0EE97 /* UIViewController+Alert.m in Sources */ = {isa = PBXBuildFile; fileRef = 621D32422531C98C00D0EE97 /* UIViewController+Alert.m */; };
+		625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */; };
 		62E09F1B19E693F3002917FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E09F1A19E693F3002917FE /* Images.xcassets */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
 		6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574B14CB3C2B005E8F3F /* KKPasscodeLock.m */; };
@@ -130,10 +131,12 @@
 		4509175823D030130028AF83 /* DarkModeCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DarkModeCheck.h; sourceTree = "<group>"; };
 		4509175923D030130028AF83 /* DarkModeCheck.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DarkModeCheck.m; sourceTree = "<group>"; };
 		45C2B2212460296200C84374 /* csv.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = csv.css; sourceTree = "<group>"; };
-		621713D228509E1F00E5E366 /* UINavigationBar+FixBarColor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationBar+FixBarColor.h"; sourceTree = "<group>"; };
-		621713D328509E1F00E5E366 /* UINavigationBar+FixBarColor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+FixBarColor.m"; sourceTree = "<group>"; };
+		621713D228509E1F00E5E366 /* UINavigationBar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationBar+FixAppearance.h"; sourceTree = "<group>"; };
+		621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+FixAppearance.m"; sourceTree = "<group>"; };
 		621D32412531C98C00D0EE97 /* UIViewController+Alert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIViewController+Alert.h"; sourceTree = "<group>"; };
 		621D32422531C98C00D0EE97 /* UIViewController+Alert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+Alert.m"; sourceTree = "<group>"; };
+		625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIToolbar+FixAppearance.h"; sourceTree = "<group>"; };
+		625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIToolbar+FixAppearance.m"; sourceTree = "<group>"; };
 		62E09F1A19E693F3002917FE /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AppSales/Images.xcassets; sourceTree = "<group>"; };
 		6D81574814CB3C2B005E8F3F /* KKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKKeychain.h; sourceTree = "<group>"; };
 		6D81574914CB3C2B005E8F3F /* KKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKKeychain.m; sourceTree = "<group>"; };
@@ -639,8 +642,10 @@
 				7F454F9F13D5C24F00AE47D1 /* UIColor+Extensions.m */,
 				7FAEB66F13E6D3AB00750788 /* UIImage+Tinting.h */,
 				7FAEB67013E6D3AB00750788 /* UIImage+Tinting.m */,
-				621713D228509E1F00E5E366 /* UINavigationBar+FixBarColor.h */,
-				621713D328509E1F00E5E366 /* UINavigationBar+FixBarColor.m */,
+				621713D228509E1F00E5E366 /* UINavigationBar+FixAppearance.h */,
+				621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */,
+				625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */,
+				625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */,
 				DA4984451C12C85F009BFC8F /* UIViewController+Orientation.h */,
 				DA4984461C12C85F009BFC8F /* UIViewController+Orientation.m */,
 				621D32412531C98C00D0EE97 /* UIViewController+Alert.h */,
@@ -984,7 +989,7 @@
 				DA4984391C129F95009BFC8F /* ioapi.c in Sources */,
 				DAFC5F931C16BFAD00261B16 /* Review.m in Sources */,
 				DA7D58F41C234D9700A3EA12 /* ReviewCell.m in Sources */,
-				621713D428509E1F00E5E366 /* UINavigationBar+FixBarColor.m in Sources */,
+				621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */,
 				7F7F4A3F13E50A52006C6651 /* PaymentsViewController.m in Sources */,
 				7F7F4A4213E51A99006C6651 /* YearView.m in Sources */,
 				7FAEB66613E6D0EE00750788 /* BadgedCell.m in Sources */,
@@ -1000,6 +1005,7 @@
 				7FA3EA9D13F77DF000C80C07 /* MultiOperation.m in Sources */,
 				7F0B8A6913F77F95006E9151 /* PromoCodeOperation.m in Sources */,
 				DAF2D89D203B5F8100F3C0CF /* ASProgressHUD.m in Sources */,
+				625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */,
 				7F0B8A6E13F7B941006E9151 /* PromoCode.m in Sources */,
 				DA49843D1C129F95009BFC8F /* ZIPArchive.mm in Sources */,
 				DAFC5F801C16B29D00261B16 /* ReviewsViewController.m in Sources */,

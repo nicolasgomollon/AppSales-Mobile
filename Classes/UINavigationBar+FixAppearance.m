@@ -6,14 +6,14 @@
 //  Copyright © 2022 omz:software. All rights reserved.
 //
 
-#import "UINavigationBar+FixBarColor.h"
+#import "UINavigationBar+FixAppearance.h"
 
 @implementation UINavigationBar (FixBarColor)
 
 /**
  iOS 15 caused the navigation bar to appear black (see through with no background color).
  */
-+ (void)fixNavigationBar {
++ (void)fixNavigationBarAppearance {
     UINavigationBarAppearance *newAppearance = [[UINavigationBarAppearance alloc] init];
     [newAppearance configureWithOpaqueBackground];
     UINavigationBar *appearance = [UINavigationBar appearance];
