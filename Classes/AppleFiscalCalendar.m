@@ -39,9 +39,10 @@
 			// First month in a quarter covers 5 weeks, the others 4.
 			BOOL isFirstPeriodOfQtr = (period % 3 == 0);
 			
-			// Special case: <rdar://problem/29996766>
-			// December has 5 weeks when (year - 1) is divisible by 5 (every 60 months).
-			BOOL specialCase = (((period + 10) % 60) == 0);
+            // Special case: <rdar://problem/29996766>
+            // December sometimes has 5 weeks. (every 60 months doesn't seem to be accurate any more).
+            // So for now we will have to manually add the periods that have 5 weeks
+            BOOL specialCase = (period == 50 || period == 110 || period == 182);
 			
 			NSDate *nextDate = [calendar dateByAddingComponents:((isFirstPeriodOfQtr || specialCase) ? components5Weeks : components4Weeks) toDate:currentDate options:0];
 			
