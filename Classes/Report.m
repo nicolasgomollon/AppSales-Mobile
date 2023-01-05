@@ -88,7 +88,11 @@
 }
 
 + (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account {
-	NSManagedObjectContext *moc = account.managedObjectContext;
+    NSManagedObjectContext *moc = account.managedObjectContext;
+    return [self insertNewReportWithCSV:csv inAccount:account with:moc];
+}
+
++ (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account with:(NSManagedObjectContext *)moc {
 	NSSet *allProducts = account.products;
 	
 	NSMutableDictionary *productsBySKU = [NSMutableDictionary dictionary];

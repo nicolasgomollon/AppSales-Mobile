@@ -31,6 +31,7 @@
 + (BOOL)validateColumnHeaders:(NSArray *)columnHeaders;
 + (NSDictionary *)infoForReportCSV:(NSString *)csv;
 + (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account;
++ (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account with:(NSManagedObjectContext *)managedObjectContext;
 + (NSDate *)dateFromReportDateString:(NSString *)dateString;
 + (NSString *)identifierForDate:(NSDate *)date;
 

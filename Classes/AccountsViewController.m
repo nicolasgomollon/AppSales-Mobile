@@ -37,6 +37,7 @@
 #define kPasscodeLockButton					@"PasscodeLockButton"
 #define kImportReportsButton				@"ImportReportsButton"
 #define kExportReportsButton				@"ExportReportsButton"
+#define kReCalculateSalesCacheButton        @"RecalculateSalesCacheButton"
 #define	kDeleteAccountButton				@"DeleteAccount"
 #define kAccountTitle						@"title"
 #define kKeychainServiceIdentifier			@"iTunesConnect"
@@ -373,6 +374,9 @@
 	FieldSpecifier *importButtonField = [FieldSpecifier buttonFieldWithKey:kImportReportsButton title:NSLocalizedString(@"Import Reports...", nil)];
 	FieldSpecifier *exportButtonField = [FieldSpecifier buttonFieldWithKey:kExportReportsButton title:NSLocalizedString(@"Export Reports...", nil)];
 	FieldSectionSpecifier *importExportSection = [FieldSectionSpecifier sectionWithFields:@[importButtonField, exportButtonField] title:nil description:nil];
+    
+    FieldSpecifier *recalculateButtonField = [FieldSpecifier buttonFieldWithKey:kReCalculateSalesCacheButton title:NSLocalizedString(@"Recalculate Sales Cache...", nil)];
+    FieldSectionSpecifier *recalculateSection = [FieldSectionSpecifier sectionWithFields:@[recalculateButtonField] title:nil description:nil];
 	
 	NSMutableArray *productFields = [[NSMutableArray alloc] init];
 	
@@ -441,7 +445,7 @@
 	FieldSpecifier *deleteAccountButtonField = [FieldSpecifier buttonFieldWithKey:kDeleteAccountButton title:NSLocalizedString(@"Delete Account...", nil)];
 	FieldSectionSpecifier *deleteAccountSection = [FieldSectionSpecifier sectionWithFields:@[deleteAccountButtonField] title:nil description:nil];
 	
-	FieldEditorViewController *editAccountViewController = [[FieldEditorViewController alloc] initWithFieldSections:@[titleSection, importExportSection, manageProductsSection, deleteAccountSection] title:NSLocalizedString(@"Account Details",nil)];
+	FieldEditorViewController *editAccountViewController = [[FieldEditorViewController alloc] initWithFieldSections:@[titleSection, importExportSection, recalculateSection, manageProductsSection, deleteAccountSection] title:NSLocalizedString(@"Account Details",nil)];
 	editAccountViewController.doneButtonTitle = nil;
 	editAccountViewController.delegate = self;
 	editAccountViewController.editorIdentifier = kEditAccountEditorIdentifier;
@@ -659,8 +663,32 @@
                 [self presentViewController:confirmImportAlert animated:YES completion:nil];
 			}
 		}
-	} else if ([key isEqualToString:kExportReportsButton]) {
-		[self doExport];
+    } else if ([key isEqualToString:kExportReportsButton]) {
+        [self doExport];
+    } else if ([key isEqualToString:kReCalculateSalesCacheButton]) {
+        ASAccount *account = (ASAccount *)editor.context;
+        if (account.isDownloadingReports) {
+            [[UIViewController topViewController] displayAlertWithTitle:nil
+                                                                message:NSLocalizedString(@"AppSales is already importing reports for this account. Please wait until the current import has finished.", nil)];
+        } else {
+            UIAlertController *confirmImportAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Begin recalculating sales cache?", nil)
+                                                                                        message:NSLocalizedString(@"Do you want to start recalculating the sales cache for this account?", nil)
+                                                                                 preferredStyle:UIAlertControllerStyleAlert];
+            
+            [confirmImportAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                                                   style:UIAlertActionStyleCancel
+                                                                 handler:nil]];
+            
+            [confirmImportAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start", nil)
+                                                                   style:UIAlertActionStyleDefault
+                                                                 handler:^(UIAlertAction * _Nonnull action) {
+                
+                [[ReportDownloadCoordinator sharedReportDownloadCoordinator] recalculateSalesCacheForAccount:self.selectedAccount];
+                [self.navigationController popViewControllerAnimated:YES];
+            }]];
+            
+            [self presentViewController:confirmImportAlert animated:YES completion:nil];
+        }
 	} else if ([key hasPrefix:@"product.appstore."]) {
 		NSString *productID = [key substringFromIndex:[@"product.appstore." length]];
 		NSString *appStoreURLString = [NSString stringWithFormat:@"https://apps.apple.com/app/id%@", productID];

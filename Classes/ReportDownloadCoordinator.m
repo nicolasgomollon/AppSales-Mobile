@@ -13,6 +13,7 @@
 #import "PromoCodeOperation.h"
 #import "ASAccount.h"
 #import "Product.h"
+#import "ReportRecalculateCacheOperation.h"
 
 @implementation ReportDownloadCoordinator
 
@@ -115,6 +116,25 @@
 		});
 	}];
 	[reportDownloadQueue addOperation:operation];
+}
+
+- (void)recalculateSalesCacheForAccount:(ASAccount *)account {
+    ReportRecalculateSalesCacheOperation *operation = [[ReportRecalculateSalesCacheOperation alloc] initWithAccount:account];
+    account.isDownloadingReports = YES;
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+    UIBackgroundTaskIdentifier backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+        NSLog(@"Background task for recalculating sales cache has expired!");
+    }];
+    [operation setCompletionBlock:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            account.isDownloadingReports = NO;
+            [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+            if (backgroundTaskID != UIBackgroundTaskInvalid) {
+                [[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
+            }
+        });
+    }];
+    [reportDownloadQueue addOperation:operation];
 }
 
 - (void)dealloc {

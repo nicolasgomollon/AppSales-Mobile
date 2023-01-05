@@ -12,6 +12,7 @@
 		621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */; };
 		621D32432531C98C00D0EE97 /* UIViewController+Alert.m in Sources */ = {isa = PBXBuildFile; fileRef = 621D32422531C98C00D0EE97 /* UIViewController+Alert.m */; };
 		625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */; };
+		62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */; };
 		62E09F1B19E693F3002917FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E09F1A19E693F3002917FE /* Images.xcassets */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
 		6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574B14CB3C2B005E8F3F /* KKPasscodeLock.m */; };
@@ -137,6 +138,8 @@
 		621D32422531C98C00D0EE97 /* UIViewController+Alert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+Alert.m"; sourceTree = "<group>"; };
 		625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIToolbar+FixAppearance.h"; sourceTree = "<group>"; };
 		625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIToolbar+FixAppearance.m"; sourceTree = "<group>"; };
+		62CDEC86296728A600DD1667 /* ReportRecalculateCacheOperation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReportRecalculateCacheOperation.h; sourceTree = "<group>"; };
+		62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReportRecalculateCacheOperation.m; sourceTree = "<group>"; };
 		62E09F1A19E693F3002917FE /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AppSales/Images.xcassets; sourceTree = "<group>"; };
 		6D81574814CB3C2B005E8F3F /* KKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKKeychain.h; sourceTree = "<group>"; };
 		6D81574914CB3C2B005E8F3F /* KKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKKeychain.m; sourceTree = "<group>"; };
@@ -378,6 +381,8 @@
 				7F1499CF13BE311600D89064 /* ReportDownloadOperation.m */,
 				7F1B153513C8029600243AA3 /* ReportImportOperation.h */,
 				7F1B153613C8029600243AA3 /* ReportImportOperation.m */,
+				62CDEC86296728A600DD1667 /* ReportRecalculateCacheOperation.h */,
+				62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */,
 			);
 			name = "Report Download";
 			sourceTree = "<group>";
@@ -1000,6 +1005,7 @@
 				7F7F1D0F13F6455A00F18143 /* PromoCodesAppViewController.m in Sources */,
 				7FA3EA9913F76E3500C80C07 /* DownloadStepOperation.m in Sources */,
 				DA49843C1C129F95009BFC8F /* zip.c in Sources */,
+				62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */,
 				DA4AC6AC1EFB051F003CAF4D /* FilterDetailTableViewCell.m in Sources */,
 				DA4AC6B61EFB54D6003CAF4D /* ReviewDownloadOperation.m in Sources */,
 				7FA3EA9D13F77DF000C80C07 /* MultiOperation.m in Sources */,
