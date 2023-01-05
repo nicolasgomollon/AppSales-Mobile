@@ -11,6 +11,7 @@
 		45C2B2232460296200C84374 /* csv.css in Resources */ = {isa = PBXBuildFile; fileRef = 45C2B2212460296200C84374 /* csv.css */; };
 		621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */; };
 		621D32432531C98C00D0EE97 /* UIViewController+Alert.m in Sources */ = {isa = PBXBuildFile; fileRef = 621D32422531C98C00D0EE97 /* UIViewController+Alert.m */; };
+		623021492965AFFC001AF90D /* Subscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 623021482965AFFC001AF90D /* Subscription.m */; };
 		625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */; };
 		62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */; };
 		62E09F1B19E693F3002917FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E09F1A19E693F3002917FE /* Images.xcassets */; };
@@ -136,8 +137,11 @@
 		621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+FixAppearance.m"; sourceTree = "<group>"; };
 		621D32412531C98C00D0EE97 /* UIViewController+Alert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIViewController+Alert.h"; sourceTree = "<group>"; };
 		621D32422531C98C00D0EE97 /* UIViewController+Alert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+Alert.m"; sourceTree = "<group>"; };
+		623021482965AFFC001AF90D /* Subscription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Subscription.m; sourceTree = "<group>"; };
+		6230214A2965B005001AF90D /* Subscription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Subscription.h; sourceTree = "<group>"; };
 		625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIToolbar+FixAppearance.h"; sourceTree = "<group>"; };
 		625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIToolbar+FixAppearance.m"; sourceTree = "<group>"; };
+		62CDEC852965B5BD00DD1667 /* AppSales 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "AppSales 8.xcdatamodel"; sourceTree = "<group>"; };
 		62CDEC86296728A600DD1667 /* ReportRecalculateCacheOperation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReportRecalculateCacheOperation.h; sourceTree = "<group>"; };
 		62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReportRecalculateCacheOperation.m; sourceTree = "<group>"; };
 		62E09F1A19E693F3002917FE /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AppSales/Images.xcassets; sourceTree = "<group>"; };
@@ -551,6 +555,8 @@
 				7F1B14F213C51AC900243AA3 /* CurrencyManager.m */,
 				7F398ED013DF21F1004BEC44 /* Transaction.h */,
 				7F398ED113DF21F2004BEC44 /* Transaction.m */,
+				6230214A2965B005001AF90D /* Subscription.h */,
+				623021482965AFFC001AF90D /* Subscription.m */,
 				7F0B8A6C13F7B941006E9151 /* PromoCode.h */,
 				7F0B8A6D13F7B941006E9151 /* PromoCode.m */,
 			);
@@ -989,6 +995,7 @@
 				7FA2C58413E0370B00BA9875 /* ReviewListViewController.m in Sources */,
 				7F26DF9113E13319001D0F33 /* ReviewDetailViewController.m in Sources */,
 				DA3DF5FF1EF1D92900CBEF87 /* DeveloperResponse.m in Sources */,
+				623021492965AFFC001AF90D /* Subscription.m in Sources */,
 				DA4AC6A01EF9AB8F003CAF4D /* FilterTableViewCell.m in Sources */,
 				7F24E70713E40A0D0056EA97 /* DashboardViewController.m in Sources */,
 				DA4984391C129F95009BFC8F /* ioapi.c in Sources */,
@@ -1194,6 +1201,7 @@
 		7F709D3F13BC98860008DBAD /* AppSales.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				62CDEC852965B5BD00DD1667 /* AppSales 8.xcdatamodel */,
 				DA1BC9E62456123100A36B92 /* AppSales 7.xcdatamodel */,
 				DA3DF5F01EF1D6CA00CBEF87 /* AppSales 6.xcdatamodel */,
 				AE778A141E2EB6F200DAA6B7 /* AppSales 5.xcdatamodel */,
@@ -1202,7 +1210,7 @@
 				7F0B8A6B13F7B776006E9151 /* AppSales 2.xcdatamodel */,
 				7F709D4013BC98860008DBAD /* AppSales.xcdatamodel */,
 			);
-			currentVersion = DA1BC9E62456123100A36B92 /* AppSales 7.xcdatamodel */;
+			currentVersion = 62CDEC852965B5BD00DD1667 /* AppSales 8.xcdatamodel */;
 			path = AppSales.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

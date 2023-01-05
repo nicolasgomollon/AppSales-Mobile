@@ -22,7 +22,11 @@ typedef NS_ENUM(NSInteger, DashboardViewMode) {
 	DashboardViewModeGiftPurchases,
 	DashboardViewModePromoCodes,
 	DashboardViewModeTotalRevenue,
-	DashboardViewModeTotalSales
+	DashboardViewModeTotalSales,
+    DashboardViewModeNewSubscriptionsSales,
+    DashboardViewModeNewSubscriptionsRevenue,
+    DashboardViewModeSubscriptionRenewalsSales,
+    DashboardViewModeSubscriptionRenewalsRevenue
 };
 
 @interface SalesViewController : DashboardViewController <GraphViewDelegate, GraphViewDataSource> {

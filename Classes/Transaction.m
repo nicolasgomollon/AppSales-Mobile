@@ -9,6 +9,7 @@
 #import "Transaction.h"
 #import "Product.h"
 #import "Report.h"
+#import "Subscription.h"
 
 
 @implementation Transaction
@@ -20,5 +21,6 @@
 @dynamic units;
 @dynamic product;
 @dynamic report;
+@dynamic subscription;
 
 @end

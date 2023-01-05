@@ -98,7 +98,7 @@
 	graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 	graphView.delegate = self;
 	graphView.dataSource = self;
-	[graphView setUnit:((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) ? [CurrencyManager sharedManager].baseCurrencyDescription : @""];
+	[graphView setUnit:[self viewModeIsCurrency:viewMode] ? [CurrencyManager sharedManager].baseCurrencyDescription : @""];
 	if (!iPad) {
 		[graphView.sectionLabelButton addTarget:self action:@selector(showGraphOptions:) forControlEvents:UIControlEventTouchUpInside];	
 	} else {
@@ -323,7 +323,22 @@
 		self.graphView.title = NSLocalizedString(@"Total Revenue", nil);
 	} else if (viewMode == DashboardViewModeTotalSales) {
 		self.graphView.title = NSLocalizedString(@"Total Sales", nil);
-	}
+    } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+        self.graphView.title = NSLocalizedString(@"New Subscriptions", nil);
+    } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+        self.graphView.title = NSLocalizedString(@"New Subscriptions Revenue", nil);
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+        self.graphView.title = NSLocalizedString(@"Subscription Renewals", nil);
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+        self.graphView.title = NSLocalizedString(@"Subscription Renewals Revenue", nil);
+    }
+}
+
+- (BOOL)viewModeIsCurrency:(DashboardViewMode)viewMode {
+    return ((viewMode == DashboardViewModeRevenue) ||
+            (viewMode == DashboardViewModeTotalRevenue) ||
+            (viewMode == DashboardViewModeNewSubscriptionsRevenue) ||
+            (viewMode == DashboardViewModeSubscriptionRenewalsRevenue));
 }
 
 #pragma mark - Actions
@@ -435,13 +450,21 @@
 		self.viewMode = DashboardViewModeRevenue;
 	} else if (viewMode == DashboardViewModeTotalRevenue) {
 		self.viewMode = DashboardViewModeTotalSales;
-	} else if (viewMode == DashboardViewModeTotalSales) {
-		self.viewMode = DashboardViewModeTotalRevenue;
+    } else if (viewMode == DashboardViewModeTotalSales) {
+        self.viewMode = DashboardViewModeTotalRevenue;
+    } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+        self.viewMode = DashboardViewModeNewSubscriptionsRevenue;
+    } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+        self.viewMode = DashboardViewModeNewSubscriptionsSales;
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsRevenue;
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
 	} else {
 		self.viewMode = DashboardViewModeRevenue;
 	}
 	[[NSUserDefaults standardUserDefaults] setInteger:viewMode forKey:kSettingDashboardViewMode];
-	if ((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) {
+	if ([self viewModeIsCurrency:viewMode]) {
 		[self.graphView setUnit:[[CurrencyManager sharedManager] baseCurrencyDescription]];
 	} else {
 		[self.graphView setUnit:@""];
@@ -565,12 +588,20 @@
 				value += [report totalNumberOfGiftPurchasesForProductWithID:selectedProduct.productID];
 			} else if (viewMode == DashboardViewModePromoCodes) {
 				value += [report totalNumberOfPromoCodeTransactionsForProductWithID:selectedProduct.productID];
-			}
+            } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                value += [report totalNumberOfNewSubscriptionsForProductWithID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+                value += [report totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                value += [report totalNumberOfSubscriptionRenewalsForProductWithID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+                value += [report totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:selectedProduct.productID];
+            }
 		}
 	}
 	
 	NSString *labelText = @"";
-	if (viewMode == DashboardViewModeRevenue) {
+	if ([self viewModeIsCurrency:viewMode]) {
 		labelText = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf(value))]];
 	} else {
 		labelText = [numberFormatter stringFromNumber:@(value)];
@@ -625,7 +656,15 @@
 					valueForProduct = (float)[report totalNumberOfGiftPurchasesForProductWithID:productID];
 				} else if (viewMode == DashboardViewModePromoCodes) {
 					valueForProduct = (float)[report totalNumberOfPromoCodeTransactionsForProductWithID:productID];
-				}
+                } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                    valueForProduct = (float)[report totalNumberOfNewSubscriptionsForProductWithID:productID];
+                } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+                    valueForProduct = [report totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:productID];
+                } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                    valueForProduct = (float)[report totalNumberOfSubscriptionRenewalsForProductWithID:productID];
+                } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+                    valueForProduct = [report totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:productID];
+                }
 			}
 			[stackedValues addObject:@(valueForProduct)];
 		} else {
@@ -777,8 +816,12 @@
 			} else {
 				title = [numberFormatter stringFromNumber:@(value)];
 			}
-		} else if (viewMode == DashboardViewModeRevenue) {
-			title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForProductWithID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForProductWithID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:product.productID]))]];
 		} else {
 			NSInteger latestNumber = 0;
 			if (viewMode == DashboardViewModeSales) {
@@ -793,7 +836,11 @@
 				latestNumber = [latestReport totalNumberOfGiftPurchasesForProductWithID:product.productID];
 			} else if (viewMode == DashboardViewModePromoCodes) {
 				latestNumber = [latestReport totalNumberOfPromoCodeTransactionsForProductWithID:product.productID];
-			}
+            } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                latestNumber = [latestReport totalNumberOfNewSubscriptionsForProductWithID:product.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                latestNumber = [latestReport totalNumberOfSubscriptionRenewalsForProductWithID:product.productID];
+            }
 			title = [numberFormatter stringFromNumber:@(latestNumber)];
 		}
 		
@@ -870,13 +917,27 @@
             [self switchAdvancedViewMode];
         }]];
         
+        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"New Subscriptions", nil)
+                                                                  style:UIAlertActionStyleDefault
+                                                                handler:^(UIAlertAction * _Nonnull action) {
+            self.viewMode = DashboardViewModeNewSubscriptionsSales;
+            [self switchAdvancedViewMode];
+        }]];
+        
+        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Subscription Renewals", nil)
+                                                                  style:UIAlertActionStyleDefault
+                                                                handler:^(UIAlertAction * _Nonnull action) {
+            self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
+            [self switchAdvancedViewMode];
+        }]];
+        
         [self presentViewController:self.activeAlertSheet animated:YES completion:nil];
 	}
 }
 
 - (void)switchAdvancedViewMode {
     [[NSUserDefaults standardUserDefaults] setInteger:viewMode forKey:kSettingDashboardViewMode];
-    if ((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) {
+    if ([self viewModeIsCurrency:viewMode]) {
         [self.graphView setUnit:[[CurrencyManager sharedManager] baseCurrencyDescription]];
     } else {
         [self.graphView setUnit:@""];
