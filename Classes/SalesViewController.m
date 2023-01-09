@@ -69,6 +69,7 @@
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:DashboardViewControllerSelectedProductsDidChangeNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:ASViewSettingsDidChangeNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowPasscodeLock:) name:ASWillShowPasscodeLockNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentAdvancedModeOptions) name:DashboardViewControllerLongPressForAdvancedViewMode object:nil];
 
 		[self performSelector:@selector(setEdgesForExtendedLayout:) withObject:@(0)];
 	}
@@ -850,89 +851,93 @@
 }
 
 - (void)selectAdvancedViewMode:(UILongPressGestureRecognizer *)gestureRecognizer {
-	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        self.activeAlertSheet = [UIAlertController alertControllerWithTitle:nil
-                                                                    message:nil
-                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
-                                                                  style:UIAlertActionStyleCancel
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.activeAlertSheet = nil;
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Revenue", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeRevenue;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Sales", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Updates", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeUpdates;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Redownloads", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeRedownloads;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Educational Sales", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeEducationalSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Gift Purchases", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeGiftPurchases;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Promo Codes", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModePromoCodes;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Total", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeTotalRevenue;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"New Subscriptions", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeNewSubscriptionsSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Subscription Renewals", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self presentViewController:self.activeAlertSheet animated:YES completion:nil];
-	}
+    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        [self presentAdvancedModeOptions];
+    }
+}
+
+- (void)presentAdvancedModeOptions {
+    self.activeAlertSheet = [UIAlertController alertControllerWithTitle:nil
+                                                                message:nil
+                                                         preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                                              style:UIAlertActionStyleCancel
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.activeAlertSheet = nil;
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Revenue", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeRevenue;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Sales", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Updates", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeUpdates;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Redownloads", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeRedownloads;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Educational Sales", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeEducationalSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Gift Purchases", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeGiftPurchases;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Promo Codes", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModePromoCodes;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Total", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeTotalRevenue;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"New Subscriptions", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeNewSubscriptionsSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Subscription Renewals", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self presentViewController:self.activeAlertSheet animated:YES completion:nil];
 }
 
 - (void)switchAdvancedViewMode {
