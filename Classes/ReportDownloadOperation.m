@@ -429,6 +429,7 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 				NSData *paymentData = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:paymentURL] returningResponse:nil error:nil];
 				NSDictionary *payment = [NSJSONSerialization JSONObjectWithData:paymentData options:0 error:nil];
 				payment = payment[@"data"];
+                if (payment == nil || [payment isEqual:NSNull.null]) { continue; }
 				NSDate *paymentReportDate = [dateFormatter dateFromString:payment[@"reportDate"]];
 				NSArray *paymentSummaries = payment[@"reportSummaries"];
 
