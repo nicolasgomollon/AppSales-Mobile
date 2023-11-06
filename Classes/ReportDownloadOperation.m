@@ -427,6 +427,7 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 
                 NSURL *paymentURL = [NSURL URLWithString:[kITCBaseURL stringByAppendingFormat:kITCPaymentVendorsPaymentAction, self->providerID, vendorID, year, month]];
 				NSData *paymentData = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:paymentURL] returningResponse:nil error:nil];
+                if (paymentData == nil) { continue; }
 				NSDictionary *payment = [NSJSONSerialization JSONObjectWithData:paymentData options:0 error:nil];
 				payment = payment[@"data"];
                 if (payment == nil || [payment isEqual:NSNull.null]) { continue; }
