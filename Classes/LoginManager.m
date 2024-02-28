@@ -387,6 +387,7 @@ NSString *const kITCPaymentVendorsPaymentAction = @"/ra/paymentConsolidation/pro
 	NSMutableURLRequest *authSessionRequest = [NSMutableURLRequest requestWithURL:authSessionURL];
 	[authSessionRequest setHTTPMethod:@"POST"];
 	[authSessionRequest setValue:kAppleAuthContentTypeValue forHTTPHeaderField:kAppleAuthContentTypeKey];
+    [authSessionRequest setValue:@"olympus-ui" forHTTPHeaderField:kITCRXRequestedWithKey];
 	[authSessionRequest setHTTPBody:bodyData];
 	[[NSURLSession.sharedSession dataTaskWithRequest:authSessionRequest
 								   completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
