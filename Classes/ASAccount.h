@@ -36,6 +36,7 @@
 @property (nonatomic, strong) NSSet *paymentReports;
 @property (nonatomic, strong) NSNumber *reportsBadge;
 @property (nonatomic, strong) NSNumber *paymentsBadge;
+@property (nonatomic, assign) BOOL downloadEnabled;
 
 - (void)deletePassword;
 - (void)deleteAccessToken;

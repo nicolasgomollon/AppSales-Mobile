@@ -41,6 +41,7 @@
 #define	kDeleteAccountButton				@"DeleteAccount"
 #define kAccountTitle						@"title"
 #define kKeychainServiceIdentifier			@"iTunesConnect"
+#define kAccountRefreshEnabled              @"AccountRefreshEnabled"
 
 
 @implementation AccountsViewController
@@ -142,6 +143,8 @@
         } else if ((account.vendorID == nil) || (account.vendorID.length == 0)) {
             [[UIViewController topViewController] displayAlertWithTitle:NSLocalizedString(@"Vendor ID Missing", nil)
                                                                 message:[NSString stringWithFormat:NSLocalizedString(@"You have not entered a vendor ID for the account \"%@\". Please go to the account's settings and fill in the missing information.", nil), account.displayName]];
+        } else if (account.downloadEnabled == FALSE) {
+            [[ReportDownloadCoordinator sharedReportDownloadCoordinator] skipReportsForAccount:account];
         } else {
             [[ReportDownloadCoordinator sharedReportDownloadCoordinator] downloadReportsForAccount:account];
         }
@@ -369,8 +372,9 @@
 	titleField.placeholder = NSLocalizedString(@"optional", nil);
 	
 	FieldSpecifier *loginSubsectionField = [FieldSpecifier subsectionFieldWithSections:[self accountSectionsFor:account] key:@"iTunesConnect" title:NSLocalizedString(@"iTunes Connect Login", nil)];
-	FieldSectionSpecifier *titleSection = [FieldSectionSpecifier sectionWithFields:@[titleField, loginSubsectionField] title:nil description:nil];
-	
+    FieldSpecifier *enabledField = [FieldSpecifier switchFieldWithKey:kAccountRefreshEnabled title:NSLocalizedString(@"Refresh Enabled", nil) defaultValue:account.downloadEnabled];
+	FieldSectionSpecifier *titleSection = [FieldSectionSpecifier sectionWithFields:@[titleField, loginSubsectionField, enabledField] title:nil description:nil];
+    
 	FieldSpecifier *importButtonField = [FieldSpecifier buttonFieldWithKey:kImportReportsButton title:NSLocalizedString(@"Import Reports...", nil)];
 	FieldSpecifier *exportButtonField = [FieldSpecifier buttonFieldWithKey:kExportReportsButton title:NSLocalizedString(@"Export Reports...", nil)];
 	FieldSectionSpecifier *importExportSection = [FieldSectionSpecifier sectionWithFields:@[importButtonField, exportButtonField] title:nil description:nil];
@@ -569,6 +573,7 @@
 			account.sortIndex = @(time(NULL));
 			account.password = password;
 			account.accessToken = accessToken;
+            account.downloadEnabled = [returnValues[kAccountRefreshEnabled] boolValue];
 		}
 		else if ([editor.editorIdentifier isEqualToString:kEditAccountEditorIdentifier]) {
 			ASAccount *account = (ASAccount *)editor.context;
@@ -579,6 +584,7 @@
 			account.vendorID = vendorID;
 			account.password = password;
 			account.accessToken = accessToken;
+            account.downloadEnabled = [returnValues[kAccountRefreshEnabled] boolValue];
 			
 			NSMutableDictionary *productsByID = [NSMutableDictionary dictionary];
 			for (Product *product in self.selectedAccount.products) {

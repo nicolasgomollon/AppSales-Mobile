@@ -49,6 +49,16 @@
 	return busy;
 }
 
+- (void)skipReportsForAccount:(ASAccount *)account {
+    if (account.isDownloadingReports) { return; }
+    account.isDownloadingReports = YES;
+    account.downloadStatus = NSLocalizedString(@"Skipping!", nil);
+    account.downloadProgress = 1.0f;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        account.isDownloadingReports = NO;
+    });
+}
+
 - (void)downloadReportsForAccount:(ASAccount *)account {
 	if (account.isDownloadingReports) { return; }
 	account.isDownloadingReports = YES;

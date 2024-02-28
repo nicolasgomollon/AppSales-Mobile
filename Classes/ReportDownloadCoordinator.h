@@ -18,6 +18,7 @@
 @property (nonatomic, readonly) BOOL isBusy;
 
 + (instancetype)sharedReportDownloadCoordinator;
+- (void)skipReportsForAccount:(ASAccount *)account;
 - (void)downloadReportsForAccount:(ASAccount *)account;
 - (void)downloadReviewsForAccount:(ASAccount *)account products:(NSArray<Product *> *)products;
 - (void)cancelDownloadForAccount:(ASAccount *)account;

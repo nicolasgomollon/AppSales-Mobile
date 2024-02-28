@@ -54,7 +54,9 @@
 
 - (void)updateStatus {
 	if (account.isDownloadingReports) {
-		[activityIndicator startAnimating];
+        if (account.downloadEnabled) {
+            [activityIndicator startAnimating];
+        }
 		statusLabel.text = account.downloadStatus;
 	} else {
 		[activityIndicator stopAnimating];
