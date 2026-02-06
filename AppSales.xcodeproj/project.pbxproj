@@ -1158,7 +1158,7 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = AppSalesMobile;
@@ -1180,7 +1180,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_NAME = AppSalesMobile;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
