@@ -985,8 +985,10 @@
 }
 
 - (void)promptForCountryCodeForAppID:(NSString *)appId {
+    NSString *appName = [self displayNameForProductID:appId];
+    NSString *message = [NSString stringWithFormat:@"Would you like to try again with a specific country code?\n\nApp: %@", appName];
     UIAlertController *prompt = [UIAlertController alertControllerWithTitle:@"Icon not found"
-                                                                    message:@"Would you like to try again with a specific country code?"
+                                                                    message:message
                                                              preferredStyle:UIAlertControllerStyleAlert];
     
     [prompt addTextFieldWithConfigurationHandler:^(UITextField *textField) {
@@ -1010,6 +1012,26 @@
     }]];
     
     [self presentViewController:prompt animated:YES completion:nil];
+}
+
+- (NSString *)displayNameForProductID:(NSString *)productID {
+    if (productID.length == 0) {
+        return @"Unknown";
+    }
+
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] initWithEntityName:@"Product"];
+    fetchRequest.fetchLimit = 1;
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"productID == %@", productID];
+
+    Product *product = [[self.managedObjectContext executeFetchRequest:fetchRequest error:nil] firstObject];
+    if (product != nil) {
+        NSString *displayName = [product displayName];
+        if (displayName.length > 0) {
+            return displayName;
+        }
+    }
+
+    return productID;
 }
 
 #pragma mark -
