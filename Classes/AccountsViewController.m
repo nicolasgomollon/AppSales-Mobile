@@ -58,7 +58,8 @@
 	
 	UIBarButtonItem *settingsButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"Gear"] style:UIBarButtonItemStylePlain target:self action:@selector(showSettings)];
 	
-	UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem *leftFlexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem *rightFlexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 	
 	UILabel *statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200.0f, 44.0f)];
 	statusLabel.font = [UIFont systemFontOfSize:14.0f];
@@ -67,6 +68,11 @@
 	statusLabel.textAlignment = NSTextAlignmentCenter;
 	UIBarButtonItem *statusItem = [[UIBarButtonItem alloc] initWithCustomView:statusLabel];
 	
+	UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
+	[infoButton addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
+	UIBarButtonItem *infoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:infoButton];
+	self.toolbarItems = @[infoButtonItem, leftFlexSpace, settingsButtonItem];
+
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul), ^{
 		NSString *currentBuild = AboutViewController.currentBuild;
@@ -74,18 +80,13 @@
 		if ((latestBuild != nil) && (currentBuild.integerValue < latestBuild.integerValue)) {
 			dispatch_async(dispatch_get_main_queue(), ^{
 				statusLabel.text = NSLocalizedString(@"UPDATE AVAILABLE", nil);
+				self.toolbarItems = @[infoButtonItem, leftFlexSpace, statusItem, rightFlexSpace, settingsButtonItem];
 			});
 		}
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 		});
 	});
-	
-	UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
-	[infoButton addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
-	UIBarButtonItem *infoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:infoButton];
-	
-	self.toolbarItems = @[infoButtonItem, flexSpace, statusItem, flexSpace, settingsButtonItem];
 	self.navigationItem.rightBarButtonItem = refreshButtonItem;
 	
 	self.title = NSLocalizedString(@"AppSales", nil);
