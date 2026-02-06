@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		621D32432531C98C00D0EE97 /* UIViewController+Alert.m in Sources */ = {isa = PBXBuildFile; fileRef = 621D32422531C98C00D0EE97 /* UIViewController+Alert.m */; };
 		623021492965AFFC001AF90D /* Subscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 623021482965AFFC001AF90D /* Subscription.m */; };
 		625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */; };
+		62CAAA2D2F3644A500E24C79 /* AppleSRPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */; };
 		62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */; };
 		62E09F1B19E693F3002917FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E09F1A19E693F3002917FE /* Images.xcassets */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
@@ -127,6 +128,7 @@
 		DAFC5F801C16B29D00261B16 /* ReviewsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F7F1C16B29D00261B16 /* ReviewsViewController.m */; };
 		DAFC5F931C16BFAD00261B16 /* Review.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F921C16BFAD00261B16 /* Review.m */; };
 		DAFC5F961C16C07100261B16 /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F951C16C07100261B16 /* Version.m */; };
+		E1A200012C10000100A1B2C3 /* SRP in Frameworks */ = {isa = PBXBuildFile; productRef = E1A200022C10000100A1B2C3 /* SRP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -353,6 +355,7 @@
 		DAFC5F921C16BFAD00261B16 /* Review.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Review.m; sourceTree = "<group>"; };
 		DAFC5F941C16C07100261B16 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
 		DAFC5F951C16C07100261B16 /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
+		E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSRPAuth.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -369,6 +372,7 @@
 				7F3796CC13F8245800FA6E49 /* MessageUI.framework in Frameworks */,
 				DA4357FC1C113B670056702C /* LocalAuthentication.framework in Frameworks */,
 				7F3796CD13F8246200FA6E49 /* libz.dylib in Frameworks */,
+				E1A200012C10000100A1B2C3 /* SRP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -849,6 +853,7 @@
 		DA9DB1B71C0FEC4C007B0178 /* Login Manager */ = {
 			isa = PBXGroup;
 			children = (
+				E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */,
 				DA9DB1B11C0FEC48007B0178 /* LoginManager.h */,
 				DA9DB1B21C0FEC48007B0178 /* LoginManager.m */,
 				DA9DB1B31C0FEC48007B0178 /* SecurityCodeInputController.h */,
@@ -873,6 +878,9 @@
 			dependencies = (
 			);
 			name = AppSales;
+			packageProductDependencies = (
+				E1A200022C10000100A1B2C3 /* SRP */,
+			);
 			productName = AppSales;
 			productReference = 7F709D2713BC98860008DBAD /* AppSalesMobile.app */;
 			productType = "com.apple.product-type.application";
@@ -900,6 +908,9 @@
 				Base,
 			);
 			mainGroup = 7F709D1C13BC98860008DBAD;
+			packageReferences = (
+				E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */,
+			);
 			productRefGroup = 7F709D2813BC98860008DBAD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1030,6 +1041,7 @@
 				DA9DB1B51C0FEC48007B0178 /* LoginManager.m in Sources */,
 				6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */,
 				6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */,
+				62CAAA2D2F3644A500E24C79 /* AppleSRPAuth.swift in Sources */,
 				DA4AC6B91EFB5AAD003CAF4D /* ReviewDownloadCoordinator.m in Sources */,
 				6D81575614CB3C2B005E8F3F /* KKPasscodeSettingsViewController.m in Sources */,
 				6D81575714CB3C2B005E8F3F /* KKPasscodeViewController.m in Sources */,
@@ -1146,11 +1158,12 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = AppSalesMobile;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1167,9 +1180,10 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_NAME = AppSalesMobile;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1197,6 +1211,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xcodesorg/swift-srp";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E1A200022C10000100A1B2C3 /* SRP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */;
+			productName = SRP;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		7F709D3F13BC98860008DBAD /* AppSales.xcdatamodeld */ = {
