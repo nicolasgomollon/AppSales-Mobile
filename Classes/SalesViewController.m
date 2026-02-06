@@ -24,7 +24,14 @@
 
 @interface SalesViewController ()
 
+@property (nonatomic, strong) UIButton *tabSelectionButton;
+
 - (NSArray *)stackedValuesForReport:(id<ReportSummary>)report;
+- (void)persistAndReloadTabSelection;
+- (NSString *)tabSelectionTitle;
+- (UIMenu *)tabSelectionMenu;
+- (void)applyTabSelection:(NSInteger)newSelection;
+- (void)updateTabSelectionButton;
 
 @end
 
@@ -128,16 +135,10 @@
 											  [rightView.rightAnchor constraintEqualToAnchor:self.topView.rightAnchor],
 											  ]];
 	
-	NSArray *segments;
 	if (iPad) {
-		segments = @[NSLocalizedString(@"Daily Reports", nil), NSLocalizedString(@"Weekly Reports", nil), NSLocalizedString(@"Calendar Months", nil), NSLocalizedString(@"Fiscal Months", nil)];
-	} else {
-		segments = @[NSLocalizedString(@"Reports", nil), NSLocalizedString(@"Months", nil)];
-	}
-	UISegmentedControl *tabControl = [[UISegmentedControl alloc] initWithItems:segments];
-	[tabControl addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventValueChanged];
-	
-	if (iPad) {
+		NSArray *segments = @[NSLocalizedString(@"Daily Reports", nil), NSLocalizedString(@"Weekly Reports", nil), NSLocalizedString(@"Calendar Months", nil), NSLocalizedString(@"Fiscal Months", nil)];
+		UISegmentedControl *tabControl = [[UISegmentedControl alloc] initWithItems:segments];
+		[tabControl addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventValueChanged];
 		if (selectedTab == 0 && showWeeks) {
 			tabControl.selectedSegmentIndex = 1;
 		} else if (selectedTab == 0 && !showWeeks) {
@@ -147,11 +148,14 @@
 		} else {
 			tabControl.selectedSegmentIndex = 2;
 		}
+		self.navigationItem.titleView = tabControl;
 	} else {
-		tabControl.selectedSegmentIndex = selectedTab;
+		self.tabSelectionButton = [UIButton buttonWithType:UIButtonTypeSystem];
+		self.tabSelectionButton.showsMenuAsPrimaryAction = YES;
+		self.tabSelectionButton.titleLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+		[self updateTabSelectionButton];
+		self.navigationItem.titleView = self.tabSelectionButton;
 	}
-	
-	self.navigationItem.titleView = tabControl;
 	
 	self.downloadReportsButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh 
 																				  target:self 
@@ -179,6 +183,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
+	[self updateTabSelectionButton];
 	if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation) != UIInterfaceOrientationIsLandscape(previousOrientation)) {
 		[self adjustInterfaceForOrientation:[UIApplication sharedApplication].statusBarOrientation];
 	}
@@ -380,13 +385,77 @@
 			showFiscalMonths = YES;
 		}
 	}
-	
+
+	[self persistAndReloadTabSelection];
+}
+
+- (void)persistAndReloadTabSelection {
 	[[NSUserDefaults standardUserDefaults] setInteger:selectedTab forKey:kSettingDashboardSelectedTab];
 	[[NSUserDefaults standardUserDefaults] setBool:showWeeks forKey:kSettingDashboardShowWeeks];
 	[[NSUserDefaults standardUserDefaults] setBool:showFiscalMonths forKey:kSettingShowFiscalMonths];
-	
+
+	[self updateTabSelectionButton];
 	[self reloadTableView];
 	[self.graphView reloadData];
+}
+
+- (NSString *)tabSelectionTitle {
+	return (selectedTab == 0) ? NSLocalizedString(@"Reports", nil) : NSLocalizedString(@"Months", nil);
+}
+
+- (UIMenu *)tabSelectionMenu {
+	__weak typeof(self) weakSelf = self;
+	UIAction *reportsAction = [UIAction actionWithTitle:NSLocalizedString(@"Reports", nil)
+												   image:nil
+											  identifier:nil
+												 handler:^(__kindof UIAction * _Nonnull action) {
+		[weakSelf applyTabSelection:0];
+	}];
+	reportsAction.state = (selectedTab == 0) ? UIMenuElementStateOn : UIMenuElementStateOff;
+
+	UIAction *monthsAction = [UIAction actionWithTitle:NSLocalizedString(@"Months", nil)
+												  image:nil
+											 identifier:nil
+												handler:^(__kindof UIAction * _Nonnull action) {
+		[weakSelf applyTabSelection:1];
+	}];
+	monthsAction.state = (selectedTab == 1) ? UIMenuElementStateOn : UIMenuElementStateOff;
+
+	return [UIMenu menuWithTitle:@"" children:@[reportsAction, monthsAction]];
+}
+
+- (void)applyTabSelection:(NSInteger)newSelection {
+	if ((newSelection < 0) || (newSelection > 1)) {
+		return;
+	}
+	if (selectedTab == newSelection) {
+		[self updateTabSelectionButton];
+		return;
+	}
+	selectedTab = newSelection;
+	[self persistAndReloadTabSelection];
+}
+
+- (void)updateTabSelectionButton {
+	if (([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) || (self.tabSelectionButton == nil)) {
+		return;
+	}
+	NSString *title = [self tabSelectionTitle];
+	UIImage *chevronImage = [UIImage systemImageNamed:@"chevron.down"];
+	if (@available(iOS 15.0, *)) {
+		UIButtonConfiguration *configuration = [UIButtonConfiguration plainButtonConfiguration];
+		configuration.title = title;
+		configuration.image = chevronImage;
+		configuration.imagePlacement = NSDirectionalRectEdgeTrailing;
+		configuration.imagePadding = 4.0f;
+		configuration.contentInsets = NSDirectionalEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
+		self.tabSelectionButton.configuration = configuration;
+	} else {
+		[self.tabSelectionButton setTitle:title forState:UIControlStateNormal];
+		[self.tabSelectionButton setImage:chevronImage forState:UIControlStateNormal];
+	}
+	self.tabSelectionButton.menu = [self tabSelectionMenu];
+	[self.tabSelectionButton sizeToFit];
 }
 
 - (void)showGraphOptions:(id)sender {
