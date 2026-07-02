@@ -11,7 +11,6 @@
 #import "DashboardAppCell.h"
 
 @interface BadgedCell : DashboardAppCell {
-	NSLayoutConstraint *textLabelLeftConstraint;
 	NSLayoutConstraint *textLabelLeftMarginConstraint;
 	NSLayoutConstraint *badgeViewWidthConstraint;
 	NSLayoutConstraint *badgeViewRightConstraint;

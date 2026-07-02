@@ -37,9 +37,11 @@
 #define kPasscodeLockButton					@"PasscodeLockButton"
 #define kImportReportsButton				@"ImportReportsButton"
 #define kExportReportsButton				@"ExportReportsButton"
+#define kReCalculateSalesCacheButton        @"RecalculateSalesCacheButton"
 #define	kDeleteAccountButton				@"DeleteAccount"
 #define kAccountTitle						@"title"
 #define kKeychainServiceIdentifier			@"iTunesConnect"
+#define kAccountRefreshEnabled              @"AccountRefreshEnabled"
 
 
 @implementation AccountsViewController
@@ -56,7 +58,8 @@
 	
 	UIBarButtonItem *settingsButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"Gear"] style:UIBarButtonItemStylePlain target:self action:@selector(showSettings)];
 	
-	UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem *leftFlexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem *rightFlexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 	
 	UILabel *statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200.0f, 44.0f)];
 	statusLabel.font = [UIFont systemFontOfSize:14.0f];
@@ -65,6 +68,11 @@
 	statusLabel.textAlignment = NSTextAlignmentCenter;
 	UIBarButtonItem *statusItem = [[UIBarButtonItem alloc] initWithCustomView:statusLabel];
 	
+	UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
+	[infoButton addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
+	UIBarButtonItem *infoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:infoButton];
+	self.toolbarItems = @[infoButtonItem, leftFlexSpace, settingsButtonItem];
+
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul), ^{
 		NSString *currentBuild = AboutViewController.currentBuild;
@@ -72,18 +80,13 @@
 		if ((latestBuild != nil) && (currentBuild.integerValue < latestBuild.integerValue)) {
 			dispatch_async(dispatch_get_main_queue(), ^{
 				statusLabel.text = NSLocalizedString(@"UPDATE AVAILABLE", nil);
+				self.toolbarItems = @[infoButtonItem, leftFlexSpace, statusItem, rightFlexSpace, settingsButtonItem];
 			});
 		}
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 		});
 	});
-	
-	UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
-	[infoButton addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
-	UIBarButtonItem *infoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:infoButton];
-	
-	self.toolbarItems = @[infoButtonItem, flexSpace, statusItem, flexSpace, settingsButtonItem];
 	self.navigationItem.rightBarButtonItem = refreshButtonItem;
 	
 	self.title = NSLocalizedString(@"AppSales", nil);
@@ -141,6 +144,8 @@
         } else if ((account.vendorID == nil) || (account.vendorID.length == 0)) {
             [[UIViewController topViewController] displayAlertWithTitle:NSLocalizedString(@"Vendor ID Missing", nil)
                                                                 message:[NSString stringWithFormat:NSLocalizedString(@"You have not entered a vendor ID for the account \"%@\". Please go to the account's settings and fill in the missing information.", nil), account.displayName]];
+        } else if (account.downloadEnabled == FALSE) {
+            [[ReportDownloadCoordinator sharedReportDownloadCoordinator] skipReportsForAccount:account];
         } else {
             [[ReportDownloadCoordinator sharedReportDownloadCoordinator] downloadReportsForAccount:account];
         }
@@ -368,11 +373,15 @@
 	titleField.placeholder = NSLocalizedString(@"optional", nil);
 	
 	FieldSpecifier *loginSubsectionField = [FieldSpecifier subsectionFieldWithSections:[self accountSectionsFor:account] key:@"iTunesConnect" title:NSLocalizedString(@"iTunes Connect Login", nil)];
-	FieldSectionSpecifier *titleSection = [FieldSectionSpecifier sectionWithFields:@[titleField, loginSubsectionField] title:nil description:nil];
-	
+    FieldSpecifier *enabledField = [FieldSpecifier switchFieldWithKey:kAccountRefreshEnabled title:NSLocalizedString(@"Refresh Enabled", nil) defaultValue:account.downloadEnabled];
+	FieldSectionSpecifier *titleSection = [FieldSectionSpecifier sectionWithFields:@[titleField, loginSubsectionField, enabledField] title:nil description:nil];
+    
 	FieldSpecifier *importButtonField = [FieldSpecifier buttonFieldWithKey:kImportReportsButton title:NSLocalizedString(@"Import Reports...", nil)];
 	FieldSpecifier *exportButtonField = [FieldSpecifier buttonFieldWithKey:kExportReportsButton title:NSLocalizedString(@"Export Reports...", nil)];
 	FieldSectionSpecifier *importExportSection = [FieldSectionSpecifier sectionWithFields:@[importButtonField, exportButtonField] title:nil description:nil];
+    
+    FieldSpecifier *recalculateButtonField = [FieldSpecifier buttonFieldWithKey:kReCalculateSalesCacheButton title:NSLocalizedString(@"Recalculate Sales Cache...", nil)];
+    FieldSectionSpecifier *recalculateSection = [FieldSectionSpecifier sectionWithFields:@[recalculateButtonField] title:nil description:nil];
 	
 	NSMutableArray *productFields = [[NSMutableArray alloc] init];
 	
@@ -441,7 +450,7 @@
 	FieldSpecifier *deleteAccountButtonField = [FieldSpecifier buttonFieldWithKey:kDeleteAccountButton title:NSLocalizedString(@"Delete Account...", nil)];
 	FieldSectionSpecifier *deleteAccountSection = [FieldSectionSpecifier sectionWithFields:@[deleteAccountButtonField] title:nil description:nil];
 	
-	FieldEditorViewController *editAccountViewController = [[FieldEditorViewController alloc] initWithFieldSections:@[titleSection, importExportSection, manageProductsSection, deleteAccountSection] title:NSLocalizedString(@"Account Details",nil)];
+	FieldEditorViewController *editAccountViewController = [[FieldEditorViewController alloc] initWithFieldSections:@[titleSection, importExportSection, recalculateSection, manageProductsSection, deleteAccountSection] title:NSLocalizedString(@"Account Details",nil)];
 	editAccountViewController.doneButtonTitle = nil;
 	editAccountViewController.delegate = self;
 	editAccountViewController.editorIdentifier = kEditAccountEditorIdentifier;
@@ -565,6 +574,7 @@
 			account.sortIndex = @(time(NULL));
 			account.password = password;
 			account.accessToken = accessToken;
+            account.downloadEnabled = [returnValues[kAccountRefreshEnabled] boolValue];
 		}
 		else if ([editor.editorIdentifier isEqualToString:kEditAccountEditorIdentifier]) {
 			ASAccount *account = (ASAccount *)editor.context;
@@ -575,6 +585,7 @@
 			account.vendorID = vendorID;
 			account.password = password;
 			account.accessToken = accessToken;
+            account.downloadEnabled = [returnValues[kAccountRefreshEnabled] boolValue];
 			
 			NSMutableDictionary *productsByID = [NSMutableDictionary dictionary];
 			for (Product *product in self.selectedAccount.products) {
@@ -659,8 +670,32 @@
                 [self presentViewController:confirmImportAlert animated:YES completion:nil];
 			}
 		}
-	} else if ([key isEqualToString:kExportReportsButton]) {
-		[self doExport];
+    } else if ([key isEqualToString:kExportReportsButton]) {
+        [self doExport];
+    } else if ([key isEqualToString:kReCalculateSalesCacheButton]) {
+        ASAccount *account = (ASAccount *)editor.context;
+        if (account.isDownloadingReports) {
+            [[UIViewController topViewController] displayAlertWithTitle:nil
+                                                                message:NSLocalizedString(@"AppSales is already importing reports for this account. Please wait until the current import has finished.", nil)];
+        } else {
+            UIAlertController *confirmImportAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Begin recalculating sales cache?", nil)
+                                                                                        message:NSLocalizedString(@"Do you want to start recalculating the sales cache for this account?", nil)
+                                                                                 preferredStyle:UIAlertControllerStyleAlert];
+            
+            [confirmImportAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                                                   style:UIAlertActionStyleCancel
+                                                                 handler:nil]];
+            
+            [confirmImportAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start", nil)
+                                                                   style:UIAlertActionStyleDefault
+                                                                 handler:^(UIAlertAction * _Nonnull action) {
+                
+                [[ReportDownloadCoordinator sharedReportDownloadCoordinator] recalculateSalesCacheForAccount:self.selectedAccount];
+                [self.navigationController popViewControllerAnimated:YES];
+            }]];
+            
+            [self presentViewController:confirmImportAlert animated:YES completion:nil];
+        }
 	} else if ([key hasPrefix:@"product.appstore."]) {
 		NSString *productID = [key substringFromIndex:[@"product.appstore." length]];
 		NSString *appStoreURLString = [NSString stringWithFormat:@"https://apps.apple.com/app/id%@", productID];
@@ -951,8 +986,10 @@
 }
 
 - (void)promptForCountryCodeForAppID:(NSString *)appId {
+    NSString *appName = [self displayNameForProductID:appId];
+    NSString *message = [NSString stringWithFormat:@"Would you like to try again with a specific country code?\n\nApp: %@", appName];
     UIAlertController *prompt = [UIAlertController alertControllerWithTitle:@"Icon not found"
-                                                                    message:@"Would you like to try again with a specific country code?"
+                                                                    message:message
                                                              preferredStyle:UIAlertControllerStyleAlert];
     
     [prompt addTextFieldWithConfigurationHandler:^(UITextField *textField) {
@@ -976,6 +1013,26 @@
     }]];
     
     [self presentViewController:prompt animated:YES completion:nil];
+}
+
+- (NSString *)displayNameForProductID:(NSString *)productID {
+    if (productID.length == 0) {
+        return @"Unknown";
+    }
+
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] initWithEntityName:@"Product"];
+    fetchRequest.fetchLimit = 1;
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"productID == %@", productID];
+
+    Product *product = [[self.managedObjectContext executeFetchRequest:fetchRequest error:nil] firstObject];
+    if (product != nil) {
+        NSString *displayName = [product displayName];
+        if (displayName.length > 0) {
+            return displayName;
+        }
+    }
+
+    return productID;
 }
 
 #pragma mark -

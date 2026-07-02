@@ -86,6 +86,38 @@
 	return total;
 }
 
+- (NSInteger)totalNumberOfNewSubscriptionsForProductWithID:(NSString *)productID {
+    NSInteger total = 0;
+    for (Report *report in reports) {
+        total += [report totalNumberOfNewSubscriptionsForProductWithID:productID];
+    }
+    return total;
+}
+
+- (NSInteger)totalNumberOfSubscriptionRenewalsForProductWithID:(NSString *)productID {
+    NSInteger total = 0;
+    for (Report *report in reports) {
+        total += [report totalNumberOfSubscriptionRenewalsForProductWithID:productID];
+    }
+    return total;
+}
+
+- (float)totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:(NSString *)productID {
+    NSInteger total = 0;
+    for (Report *report in reports) {
+        total += [report totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:productID];
+    }
+    return total;
+}
+
+- (float)totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:(NSString *)productID {
+    NSInteger total = 0;
+    for (Report *report in reports) {
+        total += [report totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:productID];
+    }
+    return total;
+}
+
 - (NSInteger)totalNumberOfPaidDownloadsForProductWithID:(NSString *)productID inCountry:(NSString *)country {
 	NSInteger total = 0;
 	for (Report *report in reports) {

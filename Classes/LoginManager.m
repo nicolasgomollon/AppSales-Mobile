@@ -8,6 +8,7 @@
 
 #import "LoginManager.h"
 #import "AccountsViewController.h"
+#import "AppSalesMobile-Swift.h"
 
 // Apple Auth API
 NSString *const kAppleAuthBaseURL      = @"https://idmsa.apple.com/appleauth/auth";
@@ -142,23 +143,42 @@ NSString *const kITCPaymentVendorsPaymentAction = @"/ra/paymentConsolidation/pro
 	NSDictionary *bodyDict = @{@"accountName": account.username ?: loginInfo[kAccountUsername],
 							   @"password": account.password ?: loginInfo[kAccountPassword],
 							   @"rememberMe": @(YES)};
-	NSData *bodyData = [NSJSONSerialization dataWithJSONObject:bodyDict options:0 error:nil];
+	NSString *location = nil;
+	NSDictionary *authConfig = [AppleSRPAuth resolveAuthConfigurationWithDefaultWidgetKey:kAppleAuthWidgetValue
+																	 defaultBaseURLString:kAppleAuthBaseURL];
+	NSString *widgetKey = authConfig[@"widgetKey"] ?: kAppleAuthWidgetValue;
+	NSString *baseURL = authConfig[@"baseURLString"] ?: kAppleAuthBaseURL;
+	NSDictionary *srpResult = [AppleSRPAuth signInWithAccountName:bodyDict[@"accountName"]
+														 password:bodyDict[@"password"]
+														widgetKey:widgetKey
+													baseURLString:baseURL];
+	appleAuthSessionId = srpResult[@"sessionId"];
+	appleAuthScnt = srpResult[@"scnt"];
+	location = srpResult[@"location"];
+	    
+	// Keep a legacy fallback so existing installs can recover if SRP fails completely.
+	// If SRP completed successfully without session headers, continue with cookie-based flow.
+	NSNumber *srpStatusCode = srpResult[@"statusCode"];
+	BOOL srpCompleted = (srpStatusCode != nil) && (srpStatusCode.integerValue >= 200) && (srpStatusCode.integerValue < 300);
+	if (!srpCompleted && ((appleAuthSessionId.length == 0) || (appleAuthScnt.length == 0))) {
+		NSData *bodyData = [NSJSONSerialization dataWithJSONObject:bodyDict options:0 error:nil];
+		
+		NSURL *signInURL = [NSURL URLWithString:[kAppleAuthBaseURL stringByAppendingString:kAppleAuthSignInAction]];
+		NSMutableURLRequest *signInRequest = [NSMutableURLRequest requestWithURL:signInURL];
+		[signInRequest setHTTPMethod:@"POST"];
+		[signInRequest setValue:kAppleAuthWidgetValue forHTTPHeaderField:kAppleAuthWidgetKey];
+		[signInRequest setValue:kAppleAuthAcceptValue forHTTPHeaderField:kAppleAuthAcceptKey];
+		[signInRequest setValue:kAppleAuthContentTypeValue forHTTPHeaderField:kAppleAuthContentTypeKey];
+		[signInRequest setHTTPBody:bodyData];
+		
+		NSHTTPURLResponse *signInResponse = nil;
+		[NSURLConnection sendSynchronousRequest:signInRequest returningResponse:&signInResponse error:nil];
+		location = signInResponse.allHeaderFields[kAppleAuthLocationKey];
+		appleAuthSessionId = signInResponse.allHeaderFields[kAppleAuthSessionIdKey];
+		appleAuthScnt = signInResponse.allHeaderFields[kAppleAuthScntKey];
+	}
 	
-	NSURL *signInURL = [NSURL URLWithString:[kAppleAuthBaseURL stringByAppendingString:kAppleAuthSignInAction]];
-	NSMutableURLRequest *signInRequest = [NSMutableURLRequest requestWithURL:signInURL];
-	[signInRequest setHTTPMethod:@"POST"];
-	[signInRequest setValue:kAppleAuthWidgetValue forHTTPHeaderField:kAppleAuthWidgetKey];
-	[signInRequest setValue:kAppleAuthAcceptValue forHTTPHeaderField:kAppleAuthAcceptKey];
-	[signInRequest setValue:kAppleAuthContentTypeValue forHTTPHeaderField:kAppleAuthContentTypeKey];
-	[signInRequest setHTTPBody:bodyData];
-	
-	NSHTTPURLResponse *signInResponse = nil;
-	[NSURLConnection sendSynchronousRequest:signInRequest returningResponse:&signInResponse error:nil];
-	NSString *location = signInResponse.allHeaderFields[kAppleAuthLocationKey];
-	appleAuthSessionId = signInResponse.allHeaderFields[kAppleAuthSessionIdKey];
-	appleAuthScnt = signInResponse.allHeaderFields[kAppleAuthScntKey];
-	
-	if ((appleAuthSessionId.length == 0) || (appleAuthScnt.length == 0)) {
+	if (!srpCompleted && ((appleAuthSessionId.length == 0) || (appleAuthScnt.length == 0))) {
 		// Wrong credentials?
 		if ([self.delegate respondsToSelector:@selector(loginFailed:)]) {
 			dispatch_async(dispatch_get_main_queue(), ^{
@@ -387,6 +407,7 @@ NSString *const kITCPaymentVendorsPaymentAction = @"/ra/paymentConsolidation/pro
 	NSMutableURLRequest *authSessionRequest = [NSMutableURLRequest requestWithURL:authSessionURL];
 	[authSessionRequest setHTTPMethod:@"POST"];
 	[authSessionRequest setValue:kAppleAuthContentTypeValue forHTTPHeaderField:kAppleAuthContentTypeKey];
+    [authSessionRequest setValue:@"olympus-ui" forHTTPHeaderField:kITCRXRequestedWithKey];
 	[authSessionRequest setHTTPBody:bodyData];
 	[[NSURLSession.sharedSession dataTaskWithRequest:authSessionRequest
 								   completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {

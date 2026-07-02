@@ -24,7 +24,14 @@
 
 @interface SalesViewController ()
 
+@property (nonatomic, strong) UIButton *tabSelectionButton;
+
 - (NSArray *)stackedValuesForReport:(id<ReportSummary>)report;
+- (void)persistAndReloadTabSelection;
+- (NSString *)tabSelectionTitle;
+- (UIMenu *)tabSelectionMenu;
+- (void)applyTabSelection:(NSInteger)newSelection;
+- (void)updateTabSelectionButton;
 
 @end
 
@@ -69,6 +76,7 @@
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:DashboardViewControllerSelectedProductsDidChangeNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:ASViewSettingsDidChangeNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowPasscodeLock:) name:ASWillShowPasscodeLockNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentAdvancedModeOptions) name:DashboardViewControllerLongPressForAdvancedViewMode object:nil];
 
 		[self performSelector:@selector(setEdgesForExtendedLayout:) withObject:@(0)];
 	}
@@ -98,7 +106,7 @@
 	graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 	graphView.delegate = self;
 	graphView.dataSource = self;
-	[graphView setUnit:((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) ? [CurrencyManager sharedManager].baseCurrencyDescription : @""];
+	[graphView setUnit:[self viewModeIsCurrency:viewMode] ? [CurrencyManager sharedManager].baseCurrencyDescription : @""];
 	if (!iPad) {
 		[graphView.sectionLabelButton addTarget:self action:@selector(showGraphOptions:) forControlEvents:UIControlEventTouchUpInside];	
 	} else {
@@ -127,16 +135,10 @@
 											  [rightView.rightAnchor constraintEqualToAnchor:self.topView.rightAnchor],
 											  ]];
 	
-	NSArray *segments;
 	if (iPad) {
-		segments = @[NSLocalizedString(@"Daily Reports", nil), NSLocalizedString(@"Weekly Reports", nil), NSLocalizedString(@"Calendar Months", nil), NSLocalizedString(@"Fiscal Months", nil)];
-	} else {
-		segments = @[NSLocalizedString(@"Reports", nil), NSLocalizedString(@"Months", nil)];
-	}
-	UISegmentedControl *tabControl = [[UISegmentedControl alloc] initWithItems:segments];
-	[tabControl addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventValueChanged];
-	
-	if (iPad) {
+		NSArray *segments = @[NSLocalizedString(@"Daily Reports", nil), NSLocalizedString(@"Weekly Reports", nil), NSLocalizedString(@"Calendar Months", nil), NSLocalizedString(@"Fiscal Months", nil)];
+		UISegmentedControl *tabControl = [[UISegmentedControl alloc] initWithItems:segments];
+		[tabControl addTarget:self action:@selector(switchTab:) forControlEvents:UIControlEventValueChanged];
 		if (selectedTab == 0 && showWeeks) {
 			tabControl.selectedSegmentIndex = 1;
 		} else if (selectedTab == 0 && !showWeeks) {
@@ -146,11 +148,14 @@
 		} else {
 			tabControl.selectedSegmentIndex = 2;
 		}
+		self.navigationItem.titleView = tabControl;
 	} else {
-		tabControl.selectedSegmentIndex = selectedTab;
+		self.tabSelectionButton = [UIButton buttonWithType:UIButtonTypeSystem];
+		self.tabSelectionButton.showsMenuAsPrimaryAction = YES;
+		self.tabSelectionButton.titleLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+		[self updateTabSelectionButton];
+		self.navigationItem.titleView = self.tabSelectionButton;
 	}
-	
-	self.navigationItem.titleView = tabControl;
 	
 	self.downloadReportsButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh 
 																				  target:self 
@@ -178,6 +183,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
+	[self updateTabSelectionButton];
 	if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation) != UIInterfaceOrientationIsLandscape(previousOrientation)) {
 		[self adjustInterfaceForOrientation:[UIApplication sharedApplication].statusBarOrientation];
 	}
@@ -323,7 +329,22 @@
 		self.graphView.title = NSLocalizedString(@"Total Revenue", nil);
 	} else if (viewMode == DashboardViewModeTotalSales) {
 		self.graphView.title = NSLocalizedString(@"Total Sales", nil);
-	}
+    } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+        self.graphView.title = NSLocalizedString(@"New Subscriptions", nil);
+    } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+        self.graphView.title = NSLocalizedString(@"New Subscriptions Revenue", nil);
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+        self.graphView.title = NSLocalizedString(@"Subscription Renewals", nil);
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+        self.graphView.title = NSLocalizedString(@"Subscription Renewals Revenue", nil);
+    }
+}
+
+- (BOOL)viewModeIsCurrency:(DashboardViewMode)viewMode {
+    return ((viewMode == DashboardViewModeRevenue) ||
+            (viewMode == DashboardViewModeTotalRevenue) ||
+            (viewMode == DashboardViewModeNewSubscriptionsRevenue) ||
+            (viewMode == DashboardViewModeSubscriptionRenewalsRevenue));
 }
 
 #pragma mark - Actions
@@ -364,13 +385,77 @@
 			showFiscalMonths = YES;
 		}
 	}
-	
+
+	[self persistAndReloadTabSelection];
+}
+
+- (void)persistAndReloadTabSelection {
 	[[NSUserDefaults standardUserDefaults] setInteger:selectedTab forKey:kSettingDashboardSelectedTab];
 	[[NSUserDefaults standardUserDefaults] setBool:showWeeks forKey:kSettingDashboardShowWeeks];
 	[[NSUserDefaults standardUserDefaults] setBool:showFiscalMonths forKey:kSettingShowFiscalMonths];
-	
+
+	[self updateTabSelectionButton];
 	[self reloadTableView];
 	[self.graphView reloadData];
+}
+
+- (NSString *)tabSelectionTitle {
+	return (selectedTab == 0) ? NSLocalizedString(@"Reports", nil) : NSLocalizedString(@"Months", nil);
+}
+
+- (UIMenu *)tabSelectionMenu {
+	__weak typeof(self) weakSelf = self;
+	UIAction *reportsAction = [UIAction actionWithTitle:NSLocalizedString(@"Reports", nil)
+												   image:nil
+											  identifier:nil
+												 handler:^(__kindof UIAction * _Nonnull action) {
+		[weakSelf applyTabSelection:0];
+	}];
+	reportsAction.state = (selectedTab == 0) ? UIMenuElementStateOn : UIMenuElementStateOff;
+
+	UIAction *monthsAction = [UIAction actionWithTitle:NSLocalizedString(@"Months", nil)
+												  image:nil
+											 identifier:nil
+												handler:^(__kindof UIAction * _Nonnull action) {
+		[weakSelf applyTabSelection:1];
+	}];
+	monthsAction.state = (selectedTab == 1) ? UIMenuElementStateOn : UIMenuElementStateOff;
+
+	return [UIMenu menuWithTitle:@"" children:@[reportsAction, monthsAction]];
+}
+
+- (void)applyTabSelection:(NSInteger)newSelection {
+	if ((newSelection < 0) || (newSelection > 1)) {
+		return;
+	}
+	if (selectedTab == newSelection) {
+		[self updateTabSelectionButton];
+		return;
+	}
+	selectedTab = newSelection;
+	[self persistAndReloadTabSelection];
+}
+
+- (void)updateTabSelectionButton {
+	if (([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) || (self.tabSelectionButton == nil)) {
+		return;
+	}
+	NSString *title = [self tabSelectionTitle];
+	UIImage *chevronImage = [UIImage systemImageNamed:@"chevron.down"];
+	if (@available(iOS 15.0, *)) {
+		UIButtonConfiguration *configuration = [UIButtonConfiguration plainButtonConfiguration];
+		configuration.title = title;
+		configuration.image = chevronImage;
+		configuration.imagePlacement = NSDirectionalRectEdgeTrailing;
+		configuration.imagePadding = 4.0f;
+		configuration.contentInsets = NSDirectionalEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
+		self.tabSelectionButton.configuration = configuration;
+	} else {
+		[self.tabSelectionButton setTitle:title forState:UIControlStateNormal];
+		[self.tabSelectionButton setImage:chevronImage forState:UIControlStateNormal];
+	}
+	self.tabSelectionButton.menu = [self tabSelectionMenu];
+	[self.tabSelectionButton sizeToFit];
 }
 
 - (void)showGraphOptions:(id)sender {
@@ -435,13 +520,21 @@
 		self.viewMode = DashboardViewModeRevenue;
 	} else if (viewMode == DashboardViewModeTotalRevenue) {
 		self.viewMode = DashboardViewModeTotalSales;
-	} else if (viewMode == DashboardViewModeTotalSales) {
-		self.viewMode = DashboardViewModeTotalRevenue;
+    } else if (viewMode == DashboardViewModeTotalSales) {
+        self.viewMode = DashboardViewModeTotalRevenue;
+    } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+        self.viewMode = DashboardViewModeNewSubscriptionsRevenue;
+    } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+        self.viewMode = DashboardViewModeNewSubscriptionsSales;
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsRevenue;
+    } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
 	} else {
 		self.viewMode = DashboardViewModeRevenue;
 	}
 	[[NSUserDefaults standardUserDefaults] setInteger:viewMode forKey:kSettingDashboardViewMode];
-	if ((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) {
+	if ([self viewModeIsCurrency:viewMode]) {
 		[self.graphView setUnit:[[CurrencyManager sharedManager] baseCurrencyDescription]];
 	} else {
 		[self.graphView setUnit:@""];
@@ -565,12 +658,20 @@
 				value += [report totalNumberOfGiftPurchasesForProductWithID:selectedProduct.productID];
 			} else if (viewMode == DashboardViewModePromoCodes) {
 				value += [report totalNumberOfPromoCodeTransactionsForProductWithID:selectedProduct.productID];
-			}
+            } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                value += [report totalNumberOfNewSubscriptionsForProductWithID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+                value += [report totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                value += [report totalNumberOfSubscriptionRenewalsForProductWithID:selectedProduct.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+                value += [report totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:selectedProduct.productID];
+            }
 		}
 	}
 	
 	NSString *labelText = @"";
-	if (viewMode == DashboardViewModeRevenue) {
+	if ([self viewModeIsCurrency:viewMode]) {
 		labelText = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf(value))]];
 	} else {
 		labelText = [numberFormatter stringFromNumber:@(value)];
@@ -625,7 +726,15 @@
 					valueForProduct = (float)[report totalNumberOfGiftPurchasesForProductWithID:productID];
 				} else if (viewMode == DashboardViewModePromoCodes) {
 					valueForProduct = (float)[report totalNumberOfPromoCodeTransactionsForProductWithID:productID];
-				}
+                } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                    valueForProduct = (float)[report totalNumberOfNewSubscriptionsForProductWithID:productID];
+                } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+                    valueForProduct = [report totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:productID];
+                } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                    valueForProduct = (float)[report totalNumberOfSubscriptionRenewalsForProductWithID:productID];
+                } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+                    valueForProduct = [report totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:productID];
+                }
 			}
 			[stackedValues addObject:@(valueForProduct)];
 		} else {
@@ -777,8 +886,12 @@
 			} else {
 				title = [numberFormatter stringFromNumber:@(value)];
 			}
-		} else if (viewMode == DashboardViewModeRevenue) {
-			title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForProductWithID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForProductWithID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeNewSubscriptionsRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:product.productID]))]];
+        } else if (viewMode == DashboardViewModeSubscriptionRenewalsRevenue) {
+            title = [NSString stringWithFormat:@"%@%@", [[CurrencyManager sharedManager] baseCurrencyDescription], [numberFormatter stringFromNumber:@(roundf([latestReport totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:product.productID]))]];
 		} else {
 			NSInteger latestNumber = 0;
 			if (viewMode == DashboardViewModeSales) {
@@ -793,7 +906,11 @@
 				latestNumber = [latestReport totalNumberOfGiftPurchasesForProductWithID:product.productID];
 			} else if (viewMode == DashboardViewModePromoCodes) {
 				latestNumber = [latestReport totalNumberOfPromoCodeTransactionsForProductWithID:product.productID];
-			}
+            } else if (viewMode == DashboardViewModeNewSubscriptionsSales) {
+                latestNumber = [latestReport totalNumberOfNewSubscriptionsForProductWithID:product.productID];
+            } else if (viewMode == DashboardViewModeSubscriptionRenewalsSales) {
+                latestNumber = [latestReport totalNumberOfSubscriptionRenewalsForProductWithID:product.productID];
+            }
 			title = [numberFormatter stringFromNumber:@(latestNumber)];
 		}
 		
@@ -803,80 +920,98 @@
 }
 
 - (void)selectAdvancedViewMode:(UILongPressGestureRecognizer *)gestureRecognizer {
-	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        self.activeAlertSheet = [UIAlertController alertControllerWithTitle:nil
-                                                                    message:nil
-                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
-                                                                  style:UIAlertActionStyleCancel
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.activeAlertSheet = nil;
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Revenue", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeRevenue;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Sales", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Updates", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeUpdates;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Redownloads", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeRedownloads;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Educational Sales", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeEducationalSales;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Gift Purchases", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeGiftPurchases;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Promo Codes", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModePromoCodes;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Total", nil)
-                                                                  style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction * _Nonnull action) {
-            self.viewMode = DashboardViewModeTotalRevenue;
-            [self switchAdvancedViewMode];
-        }]];
-        
-        [self presentViewController:self.activeAlertSheet animated:YES completion:nil];
-	}
+    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        [self presentAdvancedModeOptions];
+    }
+}
+
+- (void)presentAdvancedModeOptions {
+    self.activeAlertSheet = [UIAlertController alertControllerWithTitle:nil
+                                                                message:nil
+                                                         preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+                                                              style:UIAlertActionStyleCancel
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.activeAlertSheet = nil;
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Revenue", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeRevenue;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Sales", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Updates", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeUpdates;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Redownloads", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeRedownloads;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Educational Sales", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeEducationalSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Gift Purchases", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeGiftPurchases;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Promo Codes", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModePromoCodes;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Total", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeTotalRevenue;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"New Subscriptions", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeNewSubscriptionsSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self.activeAlertSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Subscription Renewals", nil)
+                                                              style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * _Nonnull action) {
+        self.viewMode = DashboardViewModeSubscriptionRenewalsSales;
+        [self switchAdvancedViewMode];
+    }]];
+    
+    [self presentViewController:self.activeAlertSheet animated:YES completion:nil];
 }
 
 - (void)switchAdvancedViewMode {
     [[NSUserDefaults standardUserDefaults] setInteger:viewMode forKey:kSettingDashboardViewMode];
-    if ((viewMode == DashboardViewModeRevenue) || (viewMode == DashboardViewModeTotalRevenue)) {
+    if ([self viewModeIsCurrency:viewMode]) {
         [self.graphView setUnit:[[CurrencyManager sharedManager] baseCurrencyDescription]];
     } else {
         [self.graphView setUnit:@""];

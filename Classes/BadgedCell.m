@@ -34,14 +34,6 @@ CGFloat const kBadgePadding = 6.0f;
 																				 metrics:nil
 																				   views:@{@"textLabel": self.textLabel}]];
 		
-		textLabelLeftConstraint = [NSLayoutConstraint constraintWithItem:self.textLabel
-																	 attribute:NSLayoutAttributeLeft
-																	 relatedBy:NSLayoutRelationEqual
-																		toItem:self.imageView
-																	 attribute:NSLayoutAttributeRight
-																	multiplier:1.0f
-																	  constant:(self.layoutMargins.left * 2.0f)];
-		
 		textLabelLeftMarginConstraint = [NSLayoutConstraint constraintWithItem:self.textLabel
 															   attribute:NSLayoutAttributeLeft
 															   relatedBy:NSLayoutRelationEqual
@@ -156,6 +148,20 @@ CGFloat const kBadgePadding = 6.0f;
 	self.textLabel.backgroundColor = [UIColor clearColor];
 }
 
+- (void)layoutSubviews {
+	[super layoutSubviews];
+	[self updateTextLabelLeadingInset];
+}
+
+- (void)updateTextLabelLeadingInset {
+	CGFloat leadingInset = 0.0f;
+	if ((imageName != nil) && (self.imageView.image != nil)) {
+		CGFloat margin = self.contentView.layoutMargins.left;
+		leadingInset = CGRectGetMaxX(self.imageView.frame) + margin;
+	}
+	textLabelLeftMarginConstraint.constant = leadingInset;
+}
+
 - (void)setProduct:(Product *)_product {
 	[super setProduct:_product];
 	self.separatorInset = UIEdgeInsetsMake(0.0f, CGRectGetMaxX(iconView.frame) + kIconPadding + 1.0f, 0.0f, 0.0f);
@@ -177,8 +183,7 @@ CGFloat const kBadgePadding = 6.0f;
 		self.imageView.image = nil;
 	}
 	self.imageView.highlightedImage = (imageName != nil) ? [UIImage as_tintedImageNamed:imageName color:[UIColor whiteColor]] : nil;
-	[self.contentView removeConstraints:@[textLabelLeftConstraint, textLabelLeftMarginConstraint]];
-	[self.contentView addConstraint:(imageName == nil) ? textLabelLeftMarginConstraint : textLabelLeftConstraint];
+	[self updateTextLabelLeadingInset];
 }
 
 - (void)updateBadgeImage {

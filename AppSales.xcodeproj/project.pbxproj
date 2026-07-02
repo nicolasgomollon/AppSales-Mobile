@@ -3,13 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4509175A23D030130028AF83 /* DarkModeCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 4509175923D030130028AF83 /* DarkModeCheck.m */; };
 		45C2B2232460296200C84374 /* csv.css in Resources */ = {isa = PBXBuildFile; fileRef = 45C2B2212460296200C84374 /* csv.css */; };
+		621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */; };
 		621D32432531C98C00D0EE97 /* UIViewController+Alert.m in Sources */ = {isa = PBXBuildFile; fileRef = 621D32422531C98C00D0EE97 /* UIViewController+Alert.m */; };
+		623021492965AFFC001AF90D /* Subscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 623021482965AFFC001AF90D /* Subscription.m */; };
+		625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */; };
+		62CAAA2D2F3644A500E24C79 /* AppleSRPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */; };
+		62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */; };
 		62E09F1B19E693F3002917FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E09F1A19E693F3002917FE /* Images.xcassets */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
 		6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574B14CB3C2B005E8F3F /* KKPasscodeLock.m */; };
@@ -123,14 +128,25 @@
 		DAFC5F801C16B29D00261B16 /* ReviewsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F7F1C16B29D00261B16 /* ReviewsViewController.m */; };
 		DAFC5F931C16BFAD00261B16 /* Review.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F921C16BFAD00261B16 /* Review.m */; };
 		DAFC5F961C16C07100261B16 /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFC5F951C16C07100261B16 /* Version.m */; };
+		E1A200012C10000100A1B2C3 /* SRP in Frameworks */ = {isa = PBXBuildFile; productRef = E1A200022C10000100A1B2C3 /* SRP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		4509175823D030130028AF83 /* DarkModeCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DarkModeCheck.h; sourceTree = "<group>"; };
 		4509175923D030130028AF83 /* DarkModeCheck.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DarkModeCheck.m; sourceTree = "<group>"; };
 		45C2B2212460296200C84374 /* csv.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = csv.css; sourceTree = "<group>"; };
+		620255FA2B8F70DA00F01EAE /* AppSales 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "AppSales 9.xcdatamodel"; sourceTree = "<group>"; };
+		621713D228509E1F00E5E366 /* UINavigationBar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationBar+FixAppearance.h"; sourceTree = "<group>"; };
+		621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+FixAppearance.m"; sourceTree = "<group>"; };
 		621D32412531C98C00D0EE97 /* UIViewController+Alert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIViewController+Alert.h"; sourceTree = "<group>"; };
 		621D32422531C98C00D0EE97 /* UIViewController+Alert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+Alert.m"; sourceTree = "<group>"; };
+		623021482965AFFC001AF90D /* Subscription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Subscription.m; sourceTree = "<group>"; };
+		6230214A2965B005001AF90D /* Subscription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Subscription.h; sourceTree = "<group>"; };
+		625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIToolbar+FixAppearance.h"; sourceTree = "<group>"; };
+		625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIToolbar+FixAppearance.m"; sourceTree = "<group>"; };
+		62CDEC852965B5BD00DD1667 /* AppSales 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "AppSales 8.xcdatamodel"; sourceTree = "<group>"; };
+		62CDEC86296728A600DD1667 /* ReportRecalculateCacheOperation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReportRecalculateCacheOperation.h; sourceTree = "<group>"; };
+		62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReportRecalculateCacheOperation.m; sourceTree = "<group>"; };
 		62E09F1A19E693F3002917FE /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AppSales/Images.xcassets; sourceTree = "<group>"; };
 		6D81574814CB3C2B005E8F3F /* KKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKKeychain.h; sourceTree = "<group>"; };
 		6D81574914CB3C2B005E8F3F /* KKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKKeychain.m; sourceTree = "<group>"; };
@@ -339,6 +355,7 @@
 		DAFC5F921C16BFAD00261B16 /* Review.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Review.m; sourceTree = "<group>"; };
 		DAFC5F941C16C07100261B16 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
 		DAFC5F951C16C07100261B16 /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
+		E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSRPAuth.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,6 +372,7 @@
 				7F3796CC13F8245800FA6E49 /* MessageUI.framework in Frameworks */,
 				DA4357FC1C113B670056702C /* LocalAuthentication.framework in Frameworks */,
 				7F3796CD13F8246200FA6E49 /* libz.dylib in Frameworks */,
+				E1A200012C10000100A1B2C3 /* SRP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +390,8 @@
 				7F1499CF13BE311600D89064 /* ReportDownloadOperation.m */,
 				7F1B153513C8029600243AA3 /* ReportImportOperation.h */,
 				7F1B153613C8029600243AA3 /* ReportImportOperation.m */,
+				62CDEC86296728A600DD1667 /* ReportRecalculateCacheOperation.h */,
+				62CDEC87296728C600DD1667 /* ReportRecalculateCacheOperation.m */,
 			);
 			name = "Report Download";
 			sourceTree = "<group>";
@@ -540,6 +560,8 @@
 				7F1B14F213C51AC900243AA3 /* CurrencyManager.m */,
 				7F398ED013DF21F1004BEC44 /* Transaction.h */,
 				7F398ED113DF21F2004BEC44 /* Transaction.m */,
+				6230214A2965B005001AF90D /* Subscription.h */,
+				623021482965AFFC001AF90D /* Subscription.m */,
 				7F0B8A6C13F7B941006E9151 /* PromoCode.h */,
 				7F0B8A6D13F7B941006E9151 /* PromoCode.m */,
 			);
@@ -636,6 +658,10 @@
 				7F454F9F13D5C24F00AE47D1 /* UIColor+Extensions.m */,
 				7FAEB66F13E6D3AB00750788 /* UIImage+Tinting.h */,
 				7FAEB67013E6D3AB00750788 /* UIImage+Tinting.m */,
+				621713D228509E1F00E5E366 /* UINavigationBar+FixAppearance.h */,
+				621713D328509E1F00E5E366 /* UINavigationBar+FixAppearance.m */,
+				625ADAB52852028C005C28AD /* UIToolbar+FixAppearance.h */,
+				625ADAB62852028C005C28AD /* UIToolbar+FixAppearance.m */,
 				DA4984451C12C85F009BFC8F /* UIViewController+Orientation.h */,
 				DA4984461C12C85F009BFC8F /* UIViewController+Orientation.m */,
 				621D32412531C98C00D0EE97 /* UIViewController+Alert.h */,
@@ -827,6 +853,7 @@
 		DA9DB1B71C0FEC4C007B0178 /* Login Manager */ = {
 			isa = PBXGroup;
 			children = (
+				E1A100012C10000100A1B2C3 /* AppleSRPAuth.swift */,
 				DA9DB1B11C0FEC48007B0178 /* LoginManager.h */,
 				DA9DB1B21C0FEC48007B0178 /* LoginManager.m */,
 				DA9DB1B31C0FEC48007B0178 /* SecurityCodeInputController.h */,
@@ -851,6 +878,9 @@
 			dependencies = (
 			);
 			name = AppSales;
+			packageProductDependencies = (
+				E1A200022C10000100A1B2C3 /* SRP */,
+			);
 			productName = AppSales;
 			productReference = 7F709D2713BC98860008DBAD /* AppSalesMobile.app */;
 			productType = "com.apple.product-type.application";
@@ -861,7 +891,7 @@
 		7F709D1E13BC98860008DBAD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1330;
 				ORGANIZATIONNAME = "omz:software";
 				TargetAttributes = {
 					7F709D2613BC98860008DBAD = {
@@ -878,6 +908,9 @@
 				Base,
 			);
 			mainGroup = 7F709D1C13BC98860008DBAD;
+			packageReferences = (
+				E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */,
+			);
 			productRefGroup = 7F709D2813BC98860008DBAD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -974,11 +1007,13 @@
 				7FA2C58413E0370B00BA9875 /* ReviewListViewController.m in Sources */,
 				7F26DF9113E13319001D0F33 /* ReviewDetailViewController.m in Sources */,
 				DA3DF5FF1EF1D92900CBEF87 /* DeveloperResponse.m in Sources */,
+				623021492965AFFC001AF90D /* Subscription.m in Sources */,
 				DA4AC6A01EF9AB8F003CAF4D /* FilterTableViewCell.m in Sources */,
 				7F24E70713E40A0D0056EA97 /* DashboardViewController.m in Sources */,
 				DA4984391C129F95009BFC8F /* ioapi.c in Sources */,
 				DAFC5F931C16BFAD00261B16 /* Review.m in Sources */,
 				DA7D58F41C234D9700A3EA12 /* ReviewCell.m in Sources */,
+				621713D428509E1F00E5E366 /* UINavigationBar+FixAppearance.m in Sources */,
 				7F7F4A3F13E50A52006C6651 /* PaymentsViewController.m in Sources */,
 				7F7F4A4213E51A99006C6651 /* YearView.m in Sources */,
 				7FAEB66613E6D0EE00750788 /* BadgedCell.m in Sources */,
@@ -989,11 +1024,13 @@
 				7F7F1D0F13F6455A00F18143 /* PromoCodesAppViewController.m in Sources */,
 				7FA3EA9913F76E3500C80C07 /* DownloadStepOperation.m in Sources */,
 				DA49843C1C129F95009BFC8F /* zip.c in Sources */,
+				62CDEC88296728C600DD1667 /* ReportRecalculateCacheOperation.m in Sources */,
 				DA4AC6AC1EFB051F003CAF4D /* FilterDetailTableViewCell.m in Sources */,
 				DA4AC6B61EFB54D6003CAF4D /* ReviewDownloadOperation.m in Sources */,
 				7FA3EA9D13F77DF000C80C07 /* MultiOperation.m in Sources */,
 				7F0B8A6913F77F95006E9151 /* PromoCodeOperation.m in Sources */,
 				DAF2D89D203B5F8100F3C0CF /* ASProgressHUD.m in Sources */,
+				625ADAB72852028C005C28AD /* UIToolbar+FixAppearance.m in Sources */,
 				7F0B8A6E13F7B941006E9151 /* PromoCode.m in Sources */,
 				DA49843D1C129F95009BFC8F /* ZIPArchive.mm in Sources */,
 				DAFC5F801C16B29D00261B16 /* ReviewsViewController.m in Sources */,
@@ -1004,6 +1041,7 @@
 				DA9DB1B51C0FEC48007B0178 /* LoginManager.m in Sources */,
 				6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */,
 				6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */,
+				62CAAA2D2F3644A500E24C79 /* AppleSRPAuth.swift in Sources */,
 				DA4AC6B91EFB5AAD003CAF4D /* ReviewDownloadCoordinator.m in Sources */,
 				6D81575614CB3C2B005E8F3F /* KKPasscodeSettingsViewController.m in Sources */,
 				6D81575714CB3C2B005E8F3F /* KKPasscodeViewController.m in Sources */,
@@ -1059,7 +1097,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-licucore";
 				SDKROOT = iphoneos;
@@ -1102,7 +1140,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = "-licucore";
 				SDKROOT = iphoneos;
@@ -1120,11 +1158,12 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = AppSalesMobile;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1140,10 +1179,11 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.omzsoftware.${PRODUCT_NAME:identifier}";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_NAME = AppSalesMobile;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1172,10 +1212,31 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xcodesorg/swift-srp";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E1A200022C10000100A1B2C3 /* SRP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A200032C10000100A1B2C3 /* XCRemoteSwiftPackageReference "swift-srp" */;
+			productName = SRP;
+		};
+/* End XCSwiftPackageProductDependency section */
+
 /* Begin XCVersionGroup section */
 		7F709D3F13BC98860008DBAD /* AppSales.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				620255FA2B8F70DA00F01EAE /* AppSales 9.xcdatamodel */,
+				62CDEC852965B5BD00DD1667 /* AppSales 8.xcdatamodel */,
 				DA1BC9E62456123100A36B92 /* AppSales 7.xcdatamodel */,
 				DA3DF5F01EF1D6CA00CBEF87 /* AppSales 6.xcdatamodel */,
 				AE778A141E2EB6F200DAA6B7 /* AppSales 5.xcdatamodel */,
@@ -1184,7 +1245,7 @@
 				7F0B8A6B13F7B776006E9151 /* AppSales 2.xcdatamodel */,
 				7F709D4013BC98860008DBAD /* AppSales.xcdatamodel */,
 			);
-			currentVersion = DA1BC9E62456123100A36B92 /* AppSales 7.xcdatamodel */;
+			currentVersion = 620255FA2B8F70DA00F01EAE /* AppSales 9.xcdatamodel */;
 			path = AppSales.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

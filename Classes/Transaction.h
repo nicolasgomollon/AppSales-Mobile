@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Product, Report;
+@class Product, Report, Subscription;
 
 @interface Transaction : NSManagedObject {
 @private
@@ -22,5 +22,6 @@
 @property (nonatomic, strong) NSNumber *units;
 @property (nonatomic, strong) Product *product;
 @property (nonatomic, strong) Report *report;
+@property (nonatomic, strong) Subscription *subscription;
 
 @end

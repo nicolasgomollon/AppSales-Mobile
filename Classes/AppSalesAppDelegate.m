@@ -20,12 +20,19 @@
 #import "PromoCodesViewController.h"
 #import "PromoCodesLicenseViewController.h"
 #import "UIViewController+Alert.h"
+#import "UINavigationBar+FixAppearance.h"
+#import "UIToolbar+FixAppearance.h"
 
 @implementation AppSalesAppDelegate
 
 @synthesize window, accountsViewController, accountsPopover;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    if (@available(iOS 13.0, *)) {
+        [UINavigationBar fixNavigationBarAppearance];
+        [UIToolbar fixToolbarAppearance];
+    }
+    
 	[[KKPasscodeLock sharedLock] setDefaultSettings];
 	[[KKPasscodeLock sharedLock] setEraseOption:NO];
 	

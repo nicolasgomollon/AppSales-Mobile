@@ -10,6 +10,7 @@
 #import "CrayonColorPickerViewController.h"
 
 #define DashboardViewControllerSelectedProductsDidChangeNotification @"DashboardViewControllerSelectedProductsDidChangeNotification"
+#define DashboardViewControllerLongPressForAdvancedViewMode @"DashboardViewControllerLongPressForAdvancedViewMode"
 
 @class ASAccount, Product;
 

@@ -26,6 +26,14 @@ static NSString *NSStringPercentEscaped(NSString *string) {
     return [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 }
 
+@interface ReportDownloadOperation ()
+
+@property (nonatomic, strong) dispatch_semaphore_t asyncCompletionSemaphore;
+@property (nonatomic, assign) BOOL waitsForAsyncCompletion;
+@property (nonatomic, assign) BOOL asyncCompletionSignaled;
+
+@end
+
 @implementation ReportDownloadOperation
 
 @synthesize accountObjectID;
@@ -38,6 +46,9 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 		_account = account;
 		accountObjectID = [account.objectID copy];
 		psc = [account.managedObjectContext persistentStoreCoordinator];
+		self.asyncCompletionSemaphore = dispatch_semaphore_create(0);
+		self.waitsForAsyncCompletion = NO;
+		self.asyncCompletionSignaled = NO;
 
 		[UIApplication sharedApplication].idleTimerDisabled = YES;
 		backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
@@ -287,11 +298,19 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 		BOOL downloadPayments = [[NSUserDefaults standardUserDefaults] boolForKey:kSettingDownloadPayments];
 		if (downloadPayments && ((numberOfReportsDownloaded > 0) || (account.payments.count == 0))) {
 			[self downloadProgress:0.9f withStatus:NSLocalizedString(@"Loading payments...", nil)];
+			@synchronized(self) {
+				self.waitsForAsyncCompletion = YES;
+				self.asyncCompletionSignaled = NO;
+			}
 
 			LoginManager *loginManager = [[LoginManager alloc] initWithAccount:_account];
 			loginManager.shouldDeleteCookies = [[NSUserDefaults standardUserDefaults] boolForKey:kSettingDeleteCookies];
 			loginManager.delegate = self;
 			[loginManager logIn];
+			dispatch_semaphore_wait(self.asyncCompletionSemaphore, DISPATCH_TIME_FOREVER);
+			@synchronized(self) {
+				self.waitsForAsyncCompletion = NO;
+			}
 		} else {
 			if (numberOfReportsDownloaded > 0) {
 				[self completeDownload];
@@ -426,9 +445,15 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 				}
 
                 NSURL *paymentURL = [NSURL URLWithString:[kITCBaseURL stringByAppendingFormat:kITCPaymentVendorsPaymentAction, self->providerID, vendorID, year, month]];
-				NSData *paymentData = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:paymentURL] returningResponse:nil error:nil];
+                NSHTTPURLResponse *paymentResponse = nil;
+                NSError *paymentError = nil;
+                NSData *paymentData = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:paymentURL]
+														   returningResponse:&paymentResponse
+																	   error:&paymentError];
+                if (paymentData == nil) { continue; }
 				NSDictionary *payment = [NSJSONSerialization JSONObjectWithData:paymentData options:0 error:nil];
 				payment = payment[@"data"];
+                if (payment == nil || [payment isEqual:NSNull.null]) { continue; }
 				NSDate *paymentReportDate = [dateFormatter dateFromString:payment[@"reportDate"]];
 				NSArray *paymentSummaries = payment[@"reportSummaries"];
 
@@ -526,7 +551,17 @@ static NSString *NSStringPercentEscaped(NSString *string) {
 	[self completeDownloadWithStatus:NSLocalizedString(@"Finished", nil)];
 }
 
+- (void)signalAsyncCompletionIfNeeded {
+	@synchronized(self) {
+		if (self.waitsForAsyncCompletion && !self.asyncCompletionSignaled) {
+			self.asyncCompletionSignaled = YES;
+			dispatch_semaphore_signal(self.asyncCompletionSemaphore);
+		}
+	}
+}
+
 - (void)completeDownloadWithStatus:(NSString *)status {
+	[self signalAsyncCompletionIfNeeded];
 	dispatch_async(dispatch_get_main_queue(), ^{
         self->_account.downloadStatus = status;
         self->_account.downloadProgress = 1.0f;

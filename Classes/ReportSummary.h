@@ -29,6 +29,10 @@
 - (NSInteger)totalNumberOfEducationalSalesForProductWithID:(NSString *)productID;
 - (NSInteger)totalNumberOfGiftPurchasesForProductWithID:(NSString *)productID;
 - (NSInteger)totalNumberOfPromoCodeTransactionsForProductWithID:(NSString *)productID;
+- (NSInteger)totalNumberOfNewSubscriptionsForProductWithID:(NSString *)productID;
+- (float)totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:(NSString *)productID;
+- (NSInteger)totalNumberOfSubscriptionRenewalsForProductWithID:(NSString *)productID;
+- (float)totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:(NSString *)productID;
 
 - (NSDictionary *)totalNumberOfPaidDownloadsByCountryAndProduct;
 

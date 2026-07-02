@@ -13,6 +13,7 @@
 #import "PromoCodeOperation.h"
 #import "ASAccount.h"
 #import "Product.h"
+#import "ReportRecalculateCacheOperation.h"
 
 @implementation ReportDownloadCoordinator
 
@@ -46,6 +47,16 @@
 
 - (BOOL)isBusy {
 	return busy;
+}
+
+- (void)skipReportsForAccount:(ASAccount *)account {
+    if (account.isDownloadingReports) { return; }
+    account.isDownloadingReports = YES;
+    account.downloadStatus = NSLocalizedString(@"Skipping!", nil);
+    account.downloadProgress = 1.0f;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        account.isDownloadingReports = NO;
+    });
 }
 
 - (void)downloadReportsForAccount:(ASAccount *)account {
@@ -115,6 +126,25 @@
 		});
 	}];
 	[reportDownloadQueue addOperation:operation];
+}
+
+- (void)recalculateSalesCacheForAccount:(ASAccount *)account {
+    ReportRecalculateSalesCacheOperation *operation = [[ReportRecalculateSalesCacheOperation alloc] initWithAccount:account];
+    account.isDownloadingReports = YES;
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+    UIBackgroundTaskIdentifier backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+        NSLog(@"Background task for recalculating sales cache has expired!");
+    }];
+    [operation setCompletionBlock:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            account.isDownloadingReports = NO;
+            [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+            if (backgroundTaskID != UIBackgroundTaskInvalid) {
+                [[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
+            }
+        });
+    }];
+    [reportDownloadQueue addOperation:operation];
 }
 
 - (void)dealloc {

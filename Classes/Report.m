@@ -13,6 +13,7 @@
 #import "Product.h"
 #import "Transaction.h"
 #import "CurrencyManager.h"
+#import "Subscription.h"
 
 #define kReportColumnDeveloperProceeds		@"royalty price"			// old report format
 #define kReportColumnDeveloperProceeds2		@"developer proceeds"
@@ -33,6 +34,14 @@
 #define kReportColumnCustomerPrice			@"customer price"
 #define kReportColumnPromoCode				@"promo code"
 #define kReportColumnVersion				@"version"
+
+// Subscriptions
+#define kReportColumnSubscription           @"subscription"             // "New" or "Renewal"
+#define kReportColumnParentIdentifier       @"parent identifier"        // Links to the main product
+#define kReportColumnPeriod                 @"period"                   // "1 Year", "1 Month" etc..
+#define kReportColumnProceedsReason         @"proceeds reason"          // "Rate After One Year" etc..
+#define kReportColumnPreservedPricing       @"preserved pricing"        // "Yes"
+#define kReportColumnOrderType              @"order type"               // "Pay Up Front Intro Offer"...
 
 @interface ReportCache : NSManagedObject
 
@@ -88,7 +97,11 @@
 }
 
 + (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account {
-	NSManagedObjectContext *moc = account.managedObjectContext;
+    NSManagedObjectContext *moc = account.managedObjectContext;
+    return [self insertNewReportWithCSV:csv inAccount:account with:moc];
+}
+
++ (Report *)insertNewReportWithCSV:(NSString *)csv inAccount:(ASAccount *)account with:(NSManagedObjectContext *)moc {
 	NSSet *allProducts = account.products;
 	
 	NSMutableDictionary *productsBySKU = [NSMutableDictionary dictionary];
@@ -182,6 +195,20 @@
 			}
 		}
 		[transaction setValue:product forKey:@"product"];
+        
+        if (rowDictionary[kReportColumnParentIdentifier] && [rowDictionary[kReportColumnParentIdentifier] length] > 2 &&
+            rowDictionary[kReportColumnSubscription] && [rowDictionary[kReportColumnSubscription] length] > 2) {
+            
+            Subscription *subscription = [NSEntityDescription insertNewObjectForEntityForName:@"Subscription" inManagedObjectContext:moc];
+            subscription.parentIdentifier = rowDictionary[kReportColumnParentIdentifier];
+            subscription.subscription = rowDictionary[kReportColumnSubscription];
+            subscription.period = rowDictionary[kReportColumnPeriod];
+            subscription.proceedsReason = rowDictionary[kReportColumnProceedsReason];
+            subscription.preservedPricing = [rowDictionary[kReportColumnPreservedPricing] isEqualToString:@"Yes"];
+            subscription.orderType = rowDictionary[kReportColumnOrderType];
+            
+            [transaction setValue:subscription forKey:@"subscription"];
+        }
 		
 		static NSDictionary *platformsByTransactionType = nil;
 		if (!platformsByTransactionType) {
@@ -204,7 +231,12 @@
 										   @"1-B": kProductPlatformAppBundle,
 										   @"F1-B": kProductPlatformMacAppBundle,
 										   @"IAY": kProductPlatformRenewableSubscription,
-										   @"IAY-M": kProductPlatformMacRenewableSubscription};
+										   @"IAY-M": kProductPlatformMacRenewableSubscription,
+                                           @"1E": kProductPlatformiPhone,
+                                           @"1EP": kProductPlatformiPad,
+                                           @"1EU": kProductPlatformUniversal,
+                                           @"FI1": kProductPlatformMacInApp
+            };
 		}
 		
 		NSString *platform = platformsByTransactionType[rowDictionary[kReportColumnProductTypeIdentifier]];
@@ -507,6 +539,76 @@
 	return [self totalNumberOfTransactionsInSet:[[self class] combinedPromoCodeTransactionTypes] forProductWithID:productID];
 }
 
+- (NSInteger)totalNumberOfNewSubscriptionsForProductWithID:(NSString *)productID {
+    return [self totalNumberOfSubscriptionsForProductWithID:productID subscriptionType:SubscriptionTypeNew];
+}
+
+- (NSInteger)totalNumberOfSubscriptionRenewalsForProductWithID:(NSString *)productID {
+    return [self totalNumberOfSubscriptionsForProductWithID:productID subscriptionType:SubscriptionTypeRenewal];
+}
+
+- (NSInteger)totalNumberOfSubscriptionsForProductWithID:(NSString *)productID subscriptionType:(SubscriptionType)type {
+    
+    NSInteger total = 0;
+    for (Transaction *transaction in [self subscriptionTransactions]) {
+        if (transaction.subscription.type != type) { continue; }
+        
+        if (productID) {
+            NSString *transactionProductID = transaction.product.productID;
+            if (![transactionProductID isEqualToString:productID]) {
+                continue;
+            }
+        }
+        
+        NSNumber *units = transaction.units;
+        total += [units integerValue];
+    }
+    
+    return total;
+}
+
+- (float)totalRevenueInBaseCurrencyForNewSubscriptionsWithProductID:(NSString *)productID {
+    return [self totalSubscriptionRevenueInBaseCurrencyForProductWithID:productID subscriptionType:SubscriptionTypeNew];
+}
+
+- (float)totalRevenueInBaseCurrencyForSubscriptionRenewalsWithProductID:(NSString *)productID {
+    return [self totalSubscriptionRevenueInBaseCurrencyForProductWithID:productID subscriptionType:SubscriptionTypeRenewal];
+}
+
+- (float)totalSubscriptionRevenueInBaseCurrencyForProductWithID:(NSString *)productID subscriptionType:(SubscriptionType)type {
+    
+    float total = 0.0;
+    for (Transaction *transaction in [self subscriptionTransactions]) {
+        if (transaction.subscription.type != type) { continue; }
+        
+        if (productID) {
+            NSString *transactionProductID = transaction.product.productID;
+            if (![transactionProductID isEqualToString:productID]) {
+                continue;
+            }
+        }
+        
+        NSString *currency = transaction.currency;
+        float transactionRevenue = [transaction.revenue floatValue];
+        NSInteger transactionUnits = [transaction.units integerValue];
+        
+        float revenue = (transactionRevenue * transactionUnits);
+        float revenueInBaseCurrency = [[CurrencyManager sharedManager] convertValue:revenue fromCurrency:currency];
+        total += revenueInBaseCurrency;
+    }
+    return total;
+}
+
+- (NSArray<Transaction *>*)subscriptionTransactions {
+    NSMutableArray *results = @[].mutableCopy;
+    for (Transaction *transaction in self.transactions) {
+        if (transaction.subscription == nil) { continue; }
+        if (transaction.subscription.parentIdentifier == nil) { continue; }
+        [results addObject:transaction];
+    }
+    return results;
+}
+
 - (int)totalNumberOfTransactionsInSet:(NSSet *)transactionTypes forProductWithID:(NSString *)productID {
 	int total = 0;
 	NSDictionary *transactionsByProduct = self.cache.content[kReportSummaryTransactions];
@@ -530,42 +632,68 @@
 	return total;
 }
 
+// https://help.apple.com/app-store-connect/#/dev63c6f4502
+//
+//  1       Free or paid app - iOS, iPadOS, watchOS
+//  1-B     App Bundle - iOS, iPadOS app bundle
+//  F1-B    App Bundle - Mac app bundle
+//  1E      Paid app - Custom iOS app
+//  1EP     Paid app - Custom iPadOS app
+//  1EU     Paid app - Custom universal app
+//  1F      Free or paid app - Universal app, excluding tvOS
+//  1T      Free or paid app - iPad apps
+//  3       Re-download - App update (iOS, watchOS, tvOS)
+//  3F      Re-download - Universal app, excluding tvOS
+//  7       Update - App update (iOS, watchOS, tvOS)
+//  7F      Update - Universal app, excluding tvOS
+//  7T      Update - App update (iPadOS)
+//  F1      Free or paid app - Mac
+//  F7      Update - App update (Mac)
+//  FI1     In-App Purchase - Mac
+//  IA1     In-App Purchase - In-app purchase (iOS, iPadOS)
+//  IA1-M   In-App Purchase - In-app purchase (Mac)
+//  IA3     Restored In-App Purchase - Non consumable in-app purchase
+//  IA9     In-App Purchase - Non-renewing subscription (iOS, iPadOS)
+//  IA9-M   In-App Purchase - Subscription (Mac)
+//  IAY     In-App Purchase - Auto-renewable subscription (iOS, iPadOS)
+//  IAY-M   In-App Purchase - Auto-renewable subscription (Mac)
+
 + (NSSet *)combinedPaidTransactionTypes {
 	static NSSet *combinedPaidTransactionTypes = nil;
 	if (!combinedPaidTransactionTypes) {
 		combinedPaidTransactionTypes = [[NSSet alloc] initWithObjects:
-							@"1",		//iPhone App
-							@"1. ",		//iPhone App
-							@"1-B",		//App Bundle
-							@"1-B. ",	//App Bundle
-							@"1E",		//Custom iPhone App
-							@"1E. ",	//Custom iPhone App
-							@"1EP",		//Custom iPad App
-							@"1EP. ",	//Custom iPad App
-							@"1EU",		//Custom Universal App
-							@"1EU. ",	//Custom Universal App
-							@"1F",		//Universal App
-							@"1F. ",	//Universal App
-							@"1T",		//iPad App
-							@"1T. ",	//iPad App
-							@"F1",		//Mac App
-							@"F1. ",	//Mac App
-							@"F1-B",	//Mac App Bundle
-							@"F1-B. ",	//Mac App Bundle
-							@"FI1",		//Mac In-App Purchase
-							@"FI1. ",	//Mac In-App Purchase
-							@"IA1-M",	//Mac In-App Purchase
-							@"IA1-M. ",	//Mac In-App Purchase
-							@"IA1",		//In-App Purchase
-							@"IA1. ",	//In-App Purchase
-							@"IA9",		//In-App Subscription
-							@"IA9. ",	//In-App Subscription
-							@"IA9-M",	//In-App Subscription Mac
-							@"IA9-M. ",	//In-App Subscription Mac
-							@"IAY",		//In-App Renewable Subscription
-							@"IAY. ",	//In-App Renewable Subscription
-							@"IAY-M",	//Mac In-App Renewable Subscription
-							@"IAY-M. ",	//Mac In-App Renewable Subscription
+							@"1",		//Free or paid app - iOS, iPadOS, watchOS
+							@"1. ",		//Free or paid app - iOS, iPadOS, watchOS
+							@"1-B",		//App Bundle - iOS, iPadOS app bundle
+							@"1-B. ",	//App Bundle - iOS, iPadOS app bundle
+							@"1E",		//Paid app - Custom iOS app
+							@"1E. ",	//Paid app - Custom iOS app
+							@"1EP",		//Paid app - Custom iPadOS app
+							@"1EP. ",	//Paid app - Custom iPadOS app
+							@"1EU",		//Paid app - Custom universal app
+							@"1EU. ",	//Paid app - Custom universal app
+							@"1F",		//Free or paid app - Universal app, excluding tvOS
+							@"1F. ",	//Free or paid app - Universal app, excluding tvOS
+							@"1T",		//Free or paid app - iPad apps
+							@"1T. ",	//Free or paid app - iPad apps
+							@"F1",		//Free or paid app - Mac
+							@"F1. ",	//Free or paid app - Mac
+							@"F1-B",	//App Bundle - Mac app bundle
+							@"F1-B. ",	//App Bundle - Mac app bundle
+							@"FI1",		//In-App Purchase - Mac
+							@"FI1. ",	//In-App Purchase - Mac
+							@"IA1-M",	//In-App Purchase - In-app purchase (Mac)
+							@"IA1-M. ",	//In-App Purchase - In-app purchase (Mac)
+							@"IA1",		//In-App Purchase - In-app purchase (iOS, iPadOS)
+							@"IA1. ",	//In-App Purchase - In-app purchase (iOS, iPadOS)
+							@"IA9",		//In-App Purchase - Non-renewing subscription (iOS, iPadOS)
+							@"IA9. ",	//In-App Purchase - Non-renewing subscription (iOS, iPadOS)
+							@"IA9-M",	//In-App Purchase - Subscription (Mac)
+							@"IA9-M. ",	//In-App Purchase - Subscription (Mac)
+							@"IAY",		//In-App Purchase - Auto-renewable subscription (iOS, iPadOS)
+							@"IAY. ",	//In-App Purchase - Auto-renewable subscription (iOS, iPadOS)
+							@"IAY-M",	//In-App Purchase - Auto-renewable subscription (Mac)
+							@"IAY-M. ",	//In-App Purchase - Auto-renewable subscription (Mac)
 							@"IAC",		//In-App Free Subscription
 							@"IAC. "	//In-App Free Subscription
 							@"1.GP",	//GP = Gift Purchase
@@ -589,10 +717,10 @@
 	static NSSet *combinedUpdateTransactionTypes = nil;
 	if (!combinedUpdateTransactionTypes) {
 		combinedUpdateTransactionTypes = [[NSSet alloc] initWithObjects:
-										@"7",		//iPhone App
-										@"7F",		//Universal App
-										@"7T",		//iPad App
-										@"F7",		//Mac App
+										@"7",		//Update - App update (iOS, watchOS, tvOS)
+										@"7F",		//Update - Universal app, excluding tvOS
+										@"7T",		//Update - App update (iPadOS)
+										@"F7",		//Update - App update (Mac)
 										@"7.GP",	//GP = Gift Purchase
 										@"7F.GP",
 										@"7T.GP",
@@ -610,8 +738,8 @@
 	static NSSet *combinedRedownloadedTransactionTypes = nil;
 	if (!combinedRedownloadedTransactionTypes) {
 		combinedRedownloadedTransactionTypes = [[NSSet alloc] initWithObjects:
-												@"3",
-												@"3F",
+												@"3",   //Re-download - App update (iOS, watchOS, tvOS)
+												@"3F",  //Re-download - Universal app, excluding tvOS
 												@"3T",
 												@"F3",
 												nil];

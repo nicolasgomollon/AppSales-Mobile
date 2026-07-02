@@ -432,6 +432,8 @@
 			[self deselectAllRowsInTableView:self.productsTableView exceptForIndexPath:nil];
 			NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
 			[self.productsTableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:DashboardViewControllerLongPressForAdvancedViewMode object:nil];
 		}
 		
 		[[NSNotificationCenter defaultCenter] postNotificationName:DashboardViewControllerSelectedProductsDidChangeNotification object:nil];
